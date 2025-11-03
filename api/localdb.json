@@ -1,0 +1,18 @@
+[
+  {
+    "artikelnummer": "219005",
+    "hersteller": "Eurolub",
+    "bezeichnung": "ECO PS-C 0W-30",
+    "freigaben": ["PSA B71 2312"],
+    "kategorie": "Longlife/Spezial",
+    "preis_netto": 15.20
+  },
+  {
+    "artikelnummer": "226001",
+    "hersteller": "Eurolub",
+    "bezeichnung": "Super Eco 0W-20",
+    "freigaben": ["Volvo RBS0-2AE"],
+    "kategorie": "Longlife/Spezial",
+    "preis_netto": 17.18
+  }
+]
