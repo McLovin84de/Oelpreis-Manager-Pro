@@ -7,7 +7,7 @@ export default function App() {
   const [filtered, setFiltered] = useState([]);
 
   useEffect(() => {
-    fetch("/api/localdb.json")
+    fetch("/localdb.json")
       .then((res) => res.json())
       .then((json) => {
         setData(json);
