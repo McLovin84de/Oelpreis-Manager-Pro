@@ -1,73 +1,83 @@
-import React, { useState, useEffect } from "react";
-import "./styles.css";
-import data from "../public/data/localdb.json";
+import React, { useEffect, useState } from "react";
 
-export default function App() {
-  const [password, setPassword] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
-  const [search, setSearch] = useState("");
+function App() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleLogin = () => {
-    if (password === "26061984") setUnlocked(true);
-    else alert("Falsches Passwort!");
-  };
+  useEffect(() => {
+    fetch("/data/localdb.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Laden der Datei");
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden der JSON:", err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
-  if (!unlocked) {
+  if (loading) {
     return (
-      <div className="login-container">
-        <h2>🔒 Geschützte Seite</h2>
-        <input
-          type="password"
-          placeholder="Passwort eingeben"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin}>Anmelden</button>
+      <div style={{ color: "white", padding: "20px" }}>
+        <h1>Ölpreis-Manager Pro</h1>
+        <p>Daten werden geladen...</p>
       </div>
     );
   }
 
-  const filtered = data.filter((item) =>
-    item.bezeichnung.toLowerCase().includes(search.toLowerCase())
-  );
+  if (error) {
+    return (
+      <div style={{ color: "white", padding: "20px" }}>
+        <h1>Ölpreis-Manager Pro</h1>
+        <p style={{ color: "red" }}>Fehler: {error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <h1>🛢️ Öl-Datenübersicht</h1>
-      <input
-        type="text"
-        placeholder="Suche nach Bezeichnung..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <table>
-        <thead>
-          <tr>
-            <th>Interne Nr</th>
-            <th>Artikelnummer</th>
-            <th>Hersteller</th>
-            <th>Bezeichnung</th>
-            <th>Kategorie</th>
-            <th>Freigaben</th>
-            <th>Netto EK</th>
-            <th>VK1</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((oil) => (
-            <tr key={oil.interne_nummer}>
-              <td>{oil.interne_nummer}</td>
-              <td>{oil.artikelnummer}</td>
-              <td>{oil.hersteller}</td>
-              <td>{oil.bezeichnung}</td>
-              <td>{oil.kategorie}</td>
-              <td>{oil.freigaben.join(", ")}</td>
-              <td>{oil.preis_netto.toFixed(2)} €</td>
-              <td>{oil.vk1.toFixed(2)} €</td>
+    <div style={{ color: "white", padding: "20px", backgroundColor: "#111", minHeight: "100vh" }}>
+      <h1>Ölpreis-Manager Pro</h1>
+      <p style={{ color: "#999" }}>Aktuelle Daten aus der WAP-Exportdatei</p>
+
+      {data.length > 0 ? (
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#222" }}>
+              <th style={{ borderBottom: "1px solid #666", padding: "8px", textAlign: "left" }}>Interne Nr.</th>
+              <th style={{ borderBottom: "1px solid #666", padding: "8px", textAlign: "left" }}>Hersteller</th>
+              <th style={{ borderBottom: "1px solid #666", padding: "8px", textAlign: "left" }}>Bezeichnung</th>
+              <th style={{ borderBottom: "1px solid #666", padding: "8px", textAlign: "left" }}>Kategorie</th>
+              <th style={{ borderBottom: "1px solid #666", padding: "8px", textAlign: "right" }}>VK1 (€)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((öl, index) => {
+              const vk1 = parseFloat(öl.vk1);
+              const vkDisplay = isNaN(vk1) ? "–" : vk1.toFixed(2);
+
+              return (
+                <tr key={index} style={{ borderBottom: "1px solid #333" }}>
+                  <td style={{ padding: "6px 8px" }}>{öl.interne_nummer || "–"}</td>
+                  <td style={{ padding: "6px 8px" }}>{öl.hersteller || "–"}</td>
+                  <td style={{ padding: "6px 8px" }}>{öl.bezeichnung || "–"}</td>
+                  <td style={{ padding: "6px 8px" }}>{öl.kategorie || "–"}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "right" }}>{vkDisplay}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p>Keine Daten gefunden.</p>
+      )}
     </div>
   );
 }
+
+export default App;
