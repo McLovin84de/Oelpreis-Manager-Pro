@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./styles.css";
-import data from "./data/localdb.json";
+import data from "../public/data/localdb.json";
 
 export default function App() {
   const [password, setPassword] = useState("");

@@ -1,0 +1,542 @@
+[
+  {
+    "interne_nummer": "OEL-001",
+    "artikelnummer": "211006",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 6L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "MB 229.51, ACEA C3, BMW LL-04, VW 507.00, Porsche C30, VW 504 00 / 507 00, API SN, VW 507 00, VW 504.00, VW 504.00/507.00, BMW Longlife-04, VW 504 00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "38,5",
+    "vk1": 150.0,
+    "bemerkungen": "MB 229.51, ACEA C3, BMW LL-04, VW 507.00, Porsche C30, VW 504 00 / 507 00, API SN, VW 507 00, VW 504.00, VW 504.00/507.00, BMW Longlife-04, VW 504 00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-002",
+    "artikelnummer": "212001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "VW 504 00 / 507 00, VW 507 00, VW 504.00/507.00, BMW Longlife-04, ACEA C3, 0W30, VW 504.00, API SN, Porsche C30, MB 229.31/229.51/229.52, VW 504 00, VW 507.00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "8,05",
+    "vk1": 25.0,
+    "bemerkungen": "VW 504 00 / 507 00, VW 507 00, VW 504.00/507.00, BMW Longlife-04, ACEA C3, 0W30, VW 504.00, API SN, Porsche C30, MB 229.31/229.51/229.52, VW 504 00, VW 507.00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-003",
+    "artikelnummer": "219001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "Fiat 9.55535-GS1, Fiat 9.55535-DS1, PSA B712312, Iveco 18-1811 SC1 LV, PSA B71 2312, ACEA C2, 0W30"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "11,18",
+    "vk1": 25.0,
+    "bemerkungen": "Fiat 9.55535-GS1, Fiat 9.55535-DS1, PSA B712312, Iveco 18-1811 SC1 LV, PSA B71 2312, ACEA C2, 0W30",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-004",
+    "artikelnummer": "219005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "Fiat 9.55535-DS1, PSA B71 2312, ACEA C2, Iveco 18-1811 SC1 LV, PSA B712312, Fiat 9.55535-GS1"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "50,8",
+    "vk1": 125.0,
+    "bemerkungen": "Fiat 9.55535-DS1, PSA B71 2312, ACEA C2, Iveco 18-1811 SC1 LV, PSA B712312, Fiat 9.55535-GS1",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-005",
+    "artikelnummer": "226001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-20",
+    "freigaben": [
+      "Ford WSS-M2C962A1, Ford WSS-M2C954A1, ILSAC GF-6A, Volvo VCC RBS0-2AE, API SP RC, MB 229.71, ACEA C5, Opel OV0401547-A20, GM dexosD, Opel OV0401547, VWC 53037, MB 229.72, ACEA C6, BMW Longlife-17 FE+, Ford WSS-M2C962-A1, Ford WSS-M2C947B1, Chrysler MS 12145, Fiat 9.55535-GSX, Ford WSS-M2C947-B1, Ford WSS-M2C954-A1, (ehem. dexos2 Gen. 2)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "8,59",
+    "vk1": 25.0,
+    "bemerkungen": "Ford WSS-M2C962A1, Ford WSS-M2C954A1, ILSAC GF-6A, Volvo VCC RBS0-2AE, API SP RC, MB 229.71, ACEA C5, Opel OV0401547-A20, GM dexosD, Opel OV0401547, VWC 53037, MB 229.72, ACEA C6, BMW Longlife-17 FE+, Ford WSS-M2C962-A1, Ford WSS-M2C947B1, Chrysler MS 12145, Fiat 9.55535-GSX, Ford WSS-M2C947-B1, Ford WSS-M2C954-A1, (ehem. dexos2 Gen. 2)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-006",
+    "artikelnummer": "226005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 0W-20",
+    "freigaben": [
+      "Ford WSS-M2C947B1, Chrysler MS 12145, Ford WSS-M2C962A1, GM dexosD, ILSAC GF-6A, MB 229.71, VWC 53037, Fiat 9.55535-GSX, ACEA C6, API SP RC, Ford WSS-M2C954-A1, Ford WSS-M2C947-B1, Opel OV0401547-A20, Opel OV0401547, BMW Longlife-17 FE+, Ford WSS-M2C962-A1, Ford WSS-M2C954A1, (ehem. dexos2 Gen. 2), MB 229.72, Volvo VCC RBS0-2AE, ACEA C5"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "39,76",
+    "vk1": 125.0,
+    "bemerkungen": "Ford WSS-M2C947B1, Chrysler MS 12145, Ford WSS-M2C962A1, GM dexosD, ILSAC GF-6A, MB 229.71, VWC 53037, Fiat 9.55535-GSX, ACEA C6, API SP RC, Ford WSS-M2C954-A1, Ford WSS-M2C947-B1, Opel OV0401547-A20, Opel OV0401547, BMW Longlife-17 FE+, Ford WSS-M2C962-A1, Ford WSS-M2C954A1, (ehem. dexos2 Gen. 2), MB 229.72, Volvo VCC RBS0-2AE, ACEA C5",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-007",
+    "artikelnummer": "252001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-20",
+    "freigaben": [
+      "ACEA C5, PSA B712010, Opel OV0401547-A20, API SN Plus, Fiat 9.55535-DM1, Opel OV 040 1547 - A20, PSA B71 2010"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "10,08",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA C5, PSA B712010, Opel OV0401547-A20, API SN Plus, Fiat 9.55535-DM1, Opel OV 040 1547 - A20, PSA B71 2010",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-008",
+    "artikelnummer": "254001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "GM dexos2(tm), VW 507 00, MB 229.51, BMW Longlife-04, VW 504 00/507 00, VW 504.00, MB 229.31, Porsche C30, VW 504.00/507.00, Opel OV0401547-D30, ACEA C3, MB 229.52, VW 504 00, GM dexos1(tm) Gen. 2, API SP, BMW LL-04, Opel OV0401547-G30, MB 229.31/229.51/229.52, VW 507.00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "8,34",
+    "vk1": 25.0,
+    "bemerkungen": "GM dexos2(tm), VW 507 00, MB 229.51, BMW Longlife-04, VW 504 00/507 00, VW 504.00, MB 229.31, Porsche C30, VW 504.00/507.00, Opel OV0401547-D30, ACEA C3, MB 229.52, VW 504 00, GM dexos1(tm) Gen. 2, API SP, BMW LL-04, Opel OV0401547-G30, MB 229.31/229.51/229.52, VW 507.00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-009",
+    "artikelnummer": "254005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "MB 229.31, VW 504 00/507 00, Porsche C30, ACEA C3, BMW LL-04, VW 504.00/507.00, Opel OV0401547-D30, API SP, GM dexos1(tm) Gen. 2, VW 507.00, GM dexos2(tm), MB 229.52, VW 507 00, MB 229.31/229.51/229.52, VW 504 00, BMW Longlife-04, MB 229.51, Opel OV0401547-G30, VW 504.00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "40,08",
+    "vk1": 125.0,
+    "bemerkungen": "MB 229.31, VW 504 00/507 00, Porsche C30, ACEA C3, BMW LL-04, VW 504.00/507.00, Opel OV0401547-D30, API SP, GM dexos1(tm) Gen. 2, VW 507.00, GM dexos2(tm), MB 229.52, VW 507 00, MB 229.31/229.51/229.52, VW 504 00, BMW Longlife-04, MB 229.51, Opel OV0401547-G30, VW 504.00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-010",
+    "artikelnummer": "255005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl ECO DXS 0W-20 5L",
+    "freigaben": [
+      "Chrysler MS 6395, ILSAC GF-6A, GM 6094M, Fiat 9.55535-GSX, API SP (RC), Ford WSS-M2C962-A, Ford WSS-M2C947-B1, ILSAC GF-5, Fiat 9.55535-CR1, GM dexos1(TM) Gen. 3, API SN Plus (RC)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "38,8",
+    "vk1": 60.62,
+    "bemerkungen": "Chrysler MS 6395, ILSAC GF-6A, GM 6094M, Fiat 9.55535-GSX, API SP (RC), Ford WSS-M2C962-A, Ford WSS-M2C947-B1, ILSAC GF-5, Fiat 9.55535-CR1, GM dexos1(TM) Gen. 3, API SN Plus (RC)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-011",
+    "artikelnummer": "314001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 5W-20",
+    "freigaben": [
+      "API SN, WSS-M2C-925B, API SL/CF, ACEA A1/B1, Ford WSS-M2C948B, Jaguar Land Rover, 5W20, ACEA C5, Ford WSS-M2C948-B, STJLR.03.5004"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "7,76",
+    "vk1": 25.0,
+    "bemerkungen": "API SN, WSS-M2C-925B, API SL/CF, ACEA A1/B1, Ford WSS-M2C948B, Jaguar Land Rover, 5W20, ACEA C5, Ford WSS-M2C948-B, STJLR.03.5004",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-012",
+    "artikelnummer": "314005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-20",
+    "freigaben": [
+      "ACEA C5, Ford WSS-M2C948B, STJLR.03.5004, API SN, Jaguar Land Rover, Ford WSS-M2C948-B"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "36,96",
+    "vk1": 125.0,
+    "bemerkungen": "ACEA C5, Ford WSS-M2C948B, STJLR.03.5004, API SN, Jaguar Land Rover, Ford WSS-M2C948-B",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-013",
+    "artikelnummer": "316020",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 20L Standart 5W-40",
+    "freigaben": [
+      "RN 0710, BMW LL-01, 502 00, PSA B71 2296, VW 502.00, 5W40, RN 0700, API SN / CF, 505 00, Porsche A40, MB 226.5, MB 229.3, PSA B712296, VW 502 00, BMW Longlife -01, Renault RN 0700 / RN 0710, 229.3, VW 502 00 / 505 00, ACEA A3/B4, ACEA A3 / B4, BMW longlife-01, VW 505 00, GM LL-B-025, Fiat 9.55535-M2, API SM/ SL/CF, VW 505.00, VW 502.00/505.00"
+    ],
+    "kategorie": "Standard",
+    "nettopreislieferant": "5,01",
+    "vk1": 17.5,
+    "bemerkungen": "RN 0710, BMW LL-01, 502 00, PSA B71 2296, VW 502.00, 5W40, RN 0700, API SN / CF, 505 00, Porsche A40, MB 226.5, MB 229.3, PSA B712296, VW 502 00, BMW Longlife -01, Renault RN 0700 / RN 0710, 229.3, VW 502 00 / 505 00, ACEA A3/B4, ACEA A3 / B4, BMW longlife-01, VW 505 00, GM LL-B-025, Fiat 9.55535-M2, API SM/ SL/CF, VW 505.00, VW 502.00/505.00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-014",
+    "artikelnummer": "319001",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "0W30, ACEA C2, Land Rover STJLR 03.5007, VWC 53035, Ford WSS-M2C950A, Ford WSS-M2C-950-A, Jaguar"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "8,11",
+    "vk1": 25.0,
+    "bemerkungen": "0W30, ACEA C2, Land Rover STJLR 03.5007, VWC 53035, Ford WSS-M2C950A, Ford WSS-M2C-950-A, Jaguar",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-015",
+    "artikelnummer": "319005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "ACEA C2, Ford WSS-M2C950A, Jaguar, Ford WSS-M2C-950-A, Land Rover STJLR 03.5007, 0W30, VWC 53035"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "36,64",
+    "vk1": 125.0,
+    "bemerkungen": "ACEA C2, Ford WSS-M2C950A, Jaguar, Ford WSS-M2C-950-A, Land Rover STJLR 03.5007, 0W30, VWC 53035",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-016",
+    "artikelnummer": "340005",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl 5L Standard 15W-40",
+    "freigaben": [
+      "229.1, API SJ/CF-4, 15W40, 271, 228.1, VDS, MAN 271, ACEA A3/B3, E2, Volvo VDS, API CF-4 / SJ, MB 228.1"
+    ],
+    "kategorie": "Standard",
+    "nettopreislieferant": "19,5",
+    "vk1": 87.5,
+    "bemerkungen": "229.1, API SJ/CF-4, 15W40, 271, 228.1, VDS, MAN 271, ACEA A3/B3, E2, Volvo VDS, API CF-4 / SJ, MB 228.1",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-017",
+    "artikelnummer": "FF6719-DR",
+    "hersteller": "Fanfaro",
+    "bezeichnung": "Motoröl Fassware Longlife/Spezial 5W-30",
+    "freigaben": [
+      "SAE 5W-30, API SN, ACEA C3, BMW Longlife-04, MB 229.51, Porsche C30, Volkswagen TL 52195, Volkswagen 504 00 Approval, Volkswagen 507 00 Approval"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "3,02",
+    "vk1": 25.0,
+    "bemerkungen": "SAE 5W-30, API SN, ACEA C3, BMW Longlife-04, MB 229.51, Porsche C30, Volkswagen TL 52195, Volkswagen 504 00 Approval, Volkswagen 507 00 Approval",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-018",
+    "artikelnummer": "20060-0050-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA A3/B4, API SL, API CF, MB 229.5, VW 502 00/505 00. Opel GM-LL-A-025, Opel GM-LL-B-025, Renault RN 0700/0710, BMW Longlife-01"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "37,13",
+    "vk1": 125.0,
+    "bemerkungen": "ACEA A3/B4, API SL, API CF, MB 229.5, VW 502 00/505 00. Opel GM-LL-A-025, Opel GM-LL-B-025, Renault RN 0700/0710, BMW Longlife-01",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-019",
+    "artikelnummer": "20118-0050-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 5l Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA C2, ACEA C3, API CF, API SN, BMW LL-04, GM Dexos2, MB (229.31), MB (229.51), MB (229.52), Opel OV 040 1547 - D30, VW (505 00), VW (505 01)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "38,06",
+    "vk1": 125.0,
+    "bemerkungen": "ACEA C2, ACEA C3, API CF, API SN, BMW LL-04, GM Dexos2, MB (229.31), MB (229.51), MB (229.52), Opel OV 040 1547 - D30, VW (505 00), VW (505 01)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-020",
+    "artikelnummer": "20118-0010-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA C2, ACEA C3, API CF, API SN, BMW LL-04, GM Dexos2, MB (229.31), MB (229.51), MB (229.52), Opel OV 040 1547 - D30, VW (505 00), VW (505 01)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "9,86",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA C2, ACEA C3, API CF, API SN, BMW LL-04, GM Dexos2, MB (229.31), MB (229.51), MB (229.52), Opel OV 040 1547 - D30, VW (505 00), VW (505 01)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-021",
+    "artikelnummer": "20146-0050-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA A1/B1, ACEA A5/B5, API CF, API SN, FORD (WSS-M2C913-A), FORD (WSS-M2C913-B), FORD (WSS-M2C913-C), FORD (WSS-M2C913-D), ILSAC GF 3, ILSAC GF 4, IVECO 18-1811 S1, JAGUAR LAND ROVER STJLR.03.5003, RENAULT (RN0700)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "37,47",
+    "vk1": 125.0,
+    "bemerkungen": "ACEA A1/B1, ACEA A5/B5, API CF, API SN, FORD (WSS-M2C913-A), FORD (WSS-M2C913-B), FORD (WSS-M2C913-C), FORD (WSS-M2C913-D), ILSAC GF 3, ILSAC GF 4, IVECO 18-1811 S1, JAGUAR LAND ROVER STJLR.03.5003, RENAULT (RN0700)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-022",
+    "artikelnummer": "20146-0010-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 1l Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA A1/B1, ACEA A5/B5, API CF, API SN, FORD (WSS-M2C913-A), FORD (WSS-M2C913-B), FORD (WSS-M2C913-C), FORD (WSS-M2C913-D), ILSAC GF 3, ILSAC GF 4, IVECO 18-1811 S1, JAGUAR LAND ROVER STJLR.03.5003, RENAULT (RN0700)"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "10,73",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA A1/B1, ACEA A5/B5, API CF, API SN, FORD (WSS-M2C913-A), FORD (WSS-M2C913-B), FORD (WSS-M2C913-C), FORD (WSS-M2C913-D), ILSAC GF 3, ILSAC GF 4, IVECO 18-1811 S1, JAGUAR LAND ROVER STJLR.03.5003, RENAULT (RN0700)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-023",
+    "artikelnummer": "20036-0200-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 1L Premium/Hochleistung 0W-20",
+    "freigaben": [
+      "ACEA A1/B1, ACEA C5, PORSCHE (C20), VW (508 00), VW (509 00)"
+    ],
+    "kategorie": "Premium/Hochleistung",
+    "nettopreislieferant": "10,86",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA A1/B1, ACEA C5, PORSCHE (C20), VW (508 00), VW (509 00)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-024",
+    "artikelnummer": "FF6726-5",
+    "hersteller": "Fanfaro",
+    "bezeichnung": "Motoröl 5l Longlife/Spezial 0W-30",
+    "freigaben": [
+      "API SN, ACEA C3, ACEA C2, BMW Longlife-04, BMW Longlife-12 FE, Fiat 9.55535-DS1, Fiat 9.55535-GS1, Ford WSS-M2C 950-A, Jaguar STJLR.03.5007, MB 229.51, Porsche C30, PSA B71 2290, PSA B71 2312, Renault RN17, Renault RN0710, Renault RN0700, VW 504.00, VW 505.01, VW 507.00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "38,06",
+    "vk1": 125.0,
+    "bemerkungen": "API SN, ACEA C3, ACEA C2, BMW Longlife-04, BMW Longlife-12 FE, Fiat 9.55535-DS1, Fiat 9.55535-GS1, Ford WSS-M2C 950-A, Jaguar STJLR.03.5007, MB 229.51, Porsche C30, PSA B71 2290, PSA B71 2312, Renault RN17, Renault RN0710, Renault RN0700, VW 504.00, VW 505.01, VW 507.00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-025",
+    "artikelnummer": "20371-0010-99",
+    "hersteller": "ROWE",
+    "bezeichnung": "Motoröl 1l Premium/Hochleistung 0W-20",
+    "freigaben": [
+      "ACEA C5, API SP, PSA (B71 2010)"
+    ],
+    "kategorie": "Premium/Hochleistung",
+    "nettopreislieferant": "11,89",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA C5, API SP, PSA (B71 2010)",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-026",
+    "artikelnummer": "550041874",
+    "hersteller": "SHELL",
+    "bezeichnung": "MOTORÖL 1L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "VW 504 00, 0W30, 0W-30, C3, 550041874, Porsche C30, VW 507 00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "8,11",
+    "vk1": 25.0,
+    "bemerkungen": "VW 504 00, 0W30, 0W-30, C3, 550041874, Porsche C30, VW 507 00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-027",
+    "artikelnummer": "550042351",
+    "hersteller": "SHELL",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "MB 229.52, C2, Fiat 9.55535-GS1, 229.51, SN, 550042351, 229.52, C2/C3, 507.00, VW 507 00, C30, Fiat 9.55535-DS1, 9.55535-GS1, 504.00, MB 229.31, MB 229.51, C3, 229.31, Porsche C30, 0W30, 0W-30, VW 504 00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "11,75",
+    "vk1": 25.0,
+    "bemerkungen": "MB 229.52, C2, Fiat 9.55535-GS1, 229.51, SN, 550042351, 229.52, C2/C3, 507.00, VW 507 00, C30, Fiat 9.55535-DS1, 9.55535-GS1, 504.00, MB 229.31, MB 229.51, C3, 229.31, Porsche C30, 0W30, 0W-30, VW 504 00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-028",
+    "artikelnummer": "550042371",
+    "hersteller": "SHELL",
+    "bezeichnung": "Motoröl 5L Longlife/Spezial 0W-30",
+    "freigaben": [
+      "SN, 0W-30, VW 504 00, MB 229.52, C3, VW 507 00, Porsche C30, C2, 0W30, Fiat 9.55535-DS1, MB 229.31, Fiat 9.55535-GS1, 550042371, MB 229.51"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "51,12",
+    "vk1": 125.0,
+    "bemerkungen": "SN, 0W-30, VW 504 00, MB 229.52, C3, VW 507 00, Porsche C30, C2, 0W30, Fiat 9.55535-DS1, MB 229.31, Fiat 9.55535-GS1, 550042371, MB 229.51",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-029",
+    "artikelnummer": "550048040",
+    "hersteller": "SHELL",
+    "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-20",
+    "freigaben": [
+      "Porsche C20, SN, VW 508 00, C5, 550048040, VW 509 00, 0W-20"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "9,75",
+    "vk1": 25.0,
+    "bemerkungen": "Porsche C20, SN, VW 508 00, C5, 550048040, VW 509 00, 0W-20",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-030",
+    "artikelnummer": "550065928",
+    "hersteller": "SHELL",
+    "bezeichnung": "Motoröl 5L Premium/Hochleistung 0W-40",
+    "freigaben": [
+      "Renault RN 0710, 550065928, VW 502 00, A3/B4, 0W-40, A3/B3, SP, VW 505 00, Renault RN 0700"
+    ],
+    "kategorie": "Premium/Hochleistung",
+    "nettopreislieferant": "42,32",
+    "vk1": 175.0,
+    "bemerkungen": "Renault RN 0710, 550065928, VW 502 00, A3/B4, 0W-40, A3/B3, SP, VW 505 00, Renault RN 0700",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-031",
+    "artikelnummer": "550053643",
+    "hersteller": "SHELL",
+    "bezeichnung": "Motoröl 1L Premium/Hochleistung 0W-20",
+    "freigaben": [
+      "Porsche C20, VW 509 00, C5, 550053643, 0W-20, SN, VW 508 00"
+    ],
+    "kategorie": "Premium/Hochleistung",
+    "nettopreislieferant": "7,97",
+    "vk1": 35.0,
+    "bemerkungen": "Porsche C20, VW 509 00, C5, 550053643, 0W-20, SN, VW 508 00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-032",
+    "artikelnummer": "109671",
+    "hersteller": "MOTUL",
+    "bezeichnung": "Motoröl 1l Longlife/Spezial 0W-30",
+    "freigaben": [
+      "MB 227.61, FIAT 9.55535-DS1, FIAT 9.55535-GS1, BMW LL-12 FE, 0W-30, API SP/RC, FORD WSS-M2C950-A, ILSAC GF-6A, 17010, CHRYSLER MS 90047, SAE 0W-30, MB 229.61, ACEA C2, CHRYSLER MS 13340"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "14,34",
+    "vk1": 25.0,
+    "bemerkungen": "MB 227.61, FIAT 9.55535-DS1, FIAT 9.55535-GS1, BMW LL-12 FE, 0W-30, API SP/RC, FORD WSS-M2C950-A, ILSAC GF-6A, 17010, CHRYSLER MS 90047, SAE 0W-30, MB 229.61, ACEA C2, CHRYSLER MS 13340",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-033",
+    "artikelnummer": "243208",
+    "hersteller": "EUROLUB",
+    "bezeichnung": "Motoröl Fassware Longlife/Spezial 0W-30",
+    "freigaben": [
+      "API SL, Volvo VCC 95200377, Volvo VCC95200377, 0W30, ACEA A5/B5"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "7,66",
+    "vk1": 25.0,
+    "bemerkungen": "API SL, Volvo VCC 95200377, Volvo VCC95200377, 0W30, ACEA A5/B5",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-034",
+    "artikelnummer": "00101610",
+    "hersteller": "Eni",
+    "bezeichnung": "Motoröl Fassware Longlife/Spezial 5W-30",
+    "freigaben": [
+      "ACEA A3/B4-04, ACEA C3, Porsche C30, BMW Longlife 04, MB-Approval 229.51, VW 504 00/507 00"
+    ],
+    "kategorie": "Longlife/Spezial",
+    "nettopreislieferant": "3,3",
+    "vk1": 25.0,
+    "bemerkungen": "ACEA A3/B4-04, ACEA C3, Porsche C30, BMW Longlife 04, MB-Approval 229.51, VW 504 00/507 00",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-035",
+    "artikelnummer": "00102310",
+    "hersteller": "Eni",
+    "bezeichnung": "Motoröl Fassware Standard 5W-40",
+    "freigaben": [
+      "ACEA A3/B4, VW 502 00, VW 505 00, API SM/CF, MB Approval 229.3/229.5, BMW Longlife 01, PSA B71 2296, Porsche A40, Renault RN0700, 0710"
+    ],
+    "kategorie": "Standard",
+    "nettopreislieferant": "3,09",
+    "vk1": 17.5,
+    "bemerkungen": "ACEA A3/B4, VW 502 00, VW 505 00, API SM/CF, MB Approval 229.3/229.5, BMW Longlife 01, PSA B71 2296, Porsche A40, Renault RN0700, 0710",
+    "status": "OK",
+    "unvollstaendig": ""
+  },
+  {
+    "interne_nummer": "OEL-036",
+    "artikelnummer": "08232-P99L2LHE",
+    "hersteller": "Honda",
+    "bezeichnung": "Motoröl Fassware Standard 10W-40",
+    "freigaben": [
+      "ACEA A3/B3, A3/B4, API SL/CF, MB 229.1, VW 501 01/ 500 00/ 505 00, Fiat 9.55535-G, BMW Spezialölliste, Peugeot/ Citroen B71 2294/ 2295"
+    ],
+    "kategorie": "Premium/Hochleistung",
+    "nettopreislieferant": "0",
+    "vk1": 17.5,
+    "bemerkungen": "ACEA A3/B3, A3/B4, API SL/CF, MB 229.1, VW 501 01/ 500 00/ 505 00, Fiat 9.55535-G, BMW Spezialölliste, Peugeot/ Citroen B71 2294/ 2295",
+    "status": "OK",
+    "unvollstaendig": ""
+  }
+]
