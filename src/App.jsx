@@ -1,64 +1,69 @@
 import React, { useState, useEffect } from "react";
 import "./styles.css";
+import data from "./data/localdb.json";
 
 export default function App() {
-  const [data, setData] = useState([]);
+  const [password, setPassword] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
   const [search, setSearch] = useState("");
-  const [filtered, setFiltered] = useState([]);
 
-  useEffect(() => {
-    fetch("/localdb.json")
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-        setFiltered(json);
-      })
-      .catch(() => alert("Fehler bei Suche"));
-  }, []);
-
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearch(value);
-    setFiltered(
-      data.filter(
-        (item) =>
-          item.hersteller.toLowerCase().includes(value) ||
-          item.bezeichnung.toLowerCase().includes(value) ||
-          item.artikelnummer.includes(value) ||
-          item.freigaben.some((f) => f.toLowerCase().includes(value))
-      )
-    );
+  const handleLogin = () => {
+    if (password === "26061984") setUnlocked(true);
+    else alert("Falsches Passwort!");
   };
 
+  if (!unlocked) {
+    return (
+      <div className="login-container">
+        <h2>🔒 Geschützte Seite</h2>
+        <input
+          type="password"
+          placeholder="Passwort eingeben"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin}>Anmelden</button>
+      </div>
+    );
+  }
+
+  const filtered = data.filter((item) =>
+    item.bezeichnung.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="app">
-      <h1>Ölpreis-Manager Pro</h1>
+    <div className="container">
+      <h1>🛢️ Öl-Datenübersicht</h1>
       <input
         type="text"
-        placeholder="Suche nach Hersteller, Freigabe oder Artikelnummer..."
+        placeholder="Suche nach Bezeichnung..."
         value={search}
-        onChange={handleSearch}
+        onChange={(e) => setSearch(e.target.value)}
       />
       <table>
         <thead>
           <tr>
+            <th>Interne Nr</th>
             <th>Artikelnummer</th>
             <th>Hersteller</th>
             <th>Bezeichnung</th>
-            <th>Freigaben</th>
             <th>Kategorie</th>
-            <th>Preis (netto)</th>
+            <th>Freigaben</th>
+            <th>Netto EK</th>
+            <th>VK1</th>
           </tr>
         </thead>
         <tbody>
-          {filtered.map((item, i) => (
-            <tr key={i}>
-              <td>{item.artikelnummer}</td>
-              <td>{item.hersteller}</td>
-              <td>{item.bezeichnung}</td>
-              <td>{item.freigaben.join(", ")}</td>
-              <td>{item.kategorie}</td>
-              <td>{item.preis_netto.toFixed(2)} €</td>
+          {filtered.map((oil) => (
+            <tr key={oil.interne_nummer}>
+              <td>{oil.interne_nummer}</td>
+              <td>{oil.artikelnummer}</td>
+              <td>{oil.hersteller}</td>
+              <td>{oil.bezeichnung}</td>
+              <td>{oil.kategorie}</td>
+              <td>{oil.freigaben.join(", ")}</td>
+              <td>{oil.preis_netto.toFixed(2)} €</td>
+              <td>{oil.vk1.toFixed(2)} €</td>
             </tr>
           ))}
         </tbody>

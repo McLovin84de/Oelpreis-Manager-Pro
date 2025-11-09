@@ -1,45 +1,126 @@
+/* === Grundlayout === */
 body {
-  background-color: #1b1b1b;
-  color: #f5f5f5;
-  font-family: "Segoe UI", sans-serif;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  font-family: "Segoe UI", Roboto, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-.app {
-  padding: 20px;
+/* === Loginbereich === */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(145deg, #222, #111);
 }
 
-h1 {
-  text-align: center;
-  color: #6ab04c;
+.login-container h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #00bcd4;
 }
 
-input {
-  display: block;
-  margin: 20px auto;
+.login-container input {
   padding: 10px;
-  width: 80%;
-  background: #2e2e2e;
-  color: white;
-  border: 1px solid #555;
+  font-size: 16px;
+  margin-bottom: 10px;
   border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #2a2a2a;
+  color: #fff;
+  width: 250px;
+  text-align: center;
 }
 
+.login-container input:focus {
+  outline: none;
+  border-color: #00bcd4;
+}
+
+.login-container button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #00bcd4;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-container button:hover {
+  background-color: #0097a7;
+}
+
+/* === Hauptseite === */
+.container {
+  padding: 20px 40px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.container h1 {
+  text-align: center;
+  color: #00bcd4;
+  margin-bottom: 30px;
+}
+
+.container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background-color: #2b2b2b;
+  color: #fff;
+  font-size: 16px;
+}
+
+/* === Tabelle === */
 table {
   width: 100%;
   border-collapse: collapse;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
   padding: 10px;
-  border-bottom: 1px solid #333;
+  text-align: left;
+  border-bottom: 1px solid #444;
 }
 
 th {
-  background: #333;
+  background-color: #333;
+  color: #00bcd4;
+  font-weight: bold;
 }
 
 tr:hover {
-  background: #2a2a2a;
+  background-color: #383838;
+}
+
+td:last-child {
+  text-align: right;
+}
+
+/* === Kategorie-Farben === */
+td:nth-child(5) {
+  font-weight: bold;
+}
+
+td:nth-child(5):contains("Standard") {
+  color: #a0a0a0;
+}
+
+td:nth-child(5):contains("Longlife/Spezial") {
+  color: #4caf50;
+}
+
+td:nth-child(5):contains("Premium/Hochleistung") {
+  color: #ff9800;
 }
