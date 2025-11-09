@@ -137,3 +137,15 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# ==========================================================
+# Öl-Export Tool – lokale Arbeits- und Backup-Dateien
+# ==========================================================
+OelExport/Bearbeitet/
+OelExport/backups/
+OelExport/analyse.csv
+OelExport/statistik.txt
+OelExport/localdb.json
+OelExport/export_log.txt
+OelExport/*.bak
+OelExport/~$*
