@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// 🔍 Vereinheitlichung von Text (entfernt Punkte, Bindestriche & Leerzeichen)
+// 🔍 Vereinheitlichung (entfernt Punkte, Bindestriche & Leerzeichen)
 const normalize = (text) => {
   if (!text) return "";
   return text.toLowerCase().replace(/[\s.\-]/g, "");
@@ -20,19 +20,41 @@ const fuzzyMatch = (text, query) => {
   return true;
 };
 
-// ✨ Text-Hervorhebung der Treffer
+// ✨ Hervorhebung unter Berücksichtigung der Normalisierung
 const highlightText = (text, query) => {
   if (!text || !query) return text;
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-  return text.split(regex).map((part, i) =>
-    regex.test(part) ? (
-      <mark key={i} style={{ backgroundColor: "#ffd54f", color: "black" }}>
-        {part}
+
+  const normText = normalize(text);
+  const normQuery = normalize(query);
+
+  const startIndex = normText.indexOf(normQuery);
+  if (startIndex === -1) return text;
+
+  // Berechne die Position im Originaltext
+  const originalStart = findOriginalIndex(text.toLowerCase(), startIndex);
+  const originalEnd = findOriginalIndex(text.toLowerCase(), startIndex + normQuery.length);
+
+  return (
+    <>
+      {text.slice(0, originalStart)}
+      <mark style={{ backgroundColor: "#ffd54f", color: "black" }}>
+        {text.slice(originalStart, originalEnd)}
       </mark>
-    ) : (
-      part
-    )
+      {text.slice(originalEnd)}
+    </>
   );
+};
+
+// Hilfsfunktion: übersetzt Index von normalisiertem auf Originaltext
+const findOriginalIndex = (original, normalizedIndex) => {
+  let normCount = 0;
+  for (let i = 0; i < original.length; i++) {
+    if (![" ", ".", "-"].includes(original[i])) {
+      if (normCount === normalizedIndex) return i;
+      normCount++;
+    }
+  }
+  return original.length;
 };
 
 function App() {
@@ -86,7 +108,6 @@ function App() {
         öl.interne_nummer || "",
       ];
 
-      // Normalisierte Felder für Vergleich
       const normalizedFields = fields.map((f) => normalize(f));
 
       if (normalizedFields.some((f) => f.includes(query))) {
