@@ -6,7 +6,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
 
-  // === JSON LADEN ===
+  // JSON laden
   useEffect(() => {
     fetch("/data/localdb.json")
       .then((res) => res.json())
@@ -15,133 +15,175 @@ function App() {
         setData(json);
         setFiltered(json?.daten || []);
       })
-      .catch((err) => {
-        console.error("❌ Fehler beim Laden der localdb.json:", err);
-      });
+      .catch((err) => console.error("❌ Fehler beim Laden der JSON:", err));
   }, []);
 
-  // === FUZZY-SUCHE ===
+  // Fuzzy Suche
   useEffect(() => {
     if (!data?.daten) return;
     const fuse = new Fuse(data.daten, {
       keys: ["freigaben", "bezeichnung", "hersteller", "artikelnummer"],
       threshold: 0.3,
     });
-    if (!search.trim()) {
-      setFiltered(data.daten);
-    } else {
-      const results = fuse.search(search);
-      setFiltered(results.map((r) => r.item));
-    }
+    if (!search.trim()) setFiltered(data.daten);
+    else setFiltered(fuse.search(search).map((r) => r.item));
   }, [search, data]);
 
-  // === HERVORHEBUNG ===
+  // Hervorhebung
   const highlight = (text) => {
     if (!text) return "";
     if (!search) return text;
     const regex = new RegExp(`(${search})`, "gi");
     return text.replace(
       regex,
-      (m) => `<mark style="background:#ffd54f;color:black">${m}</mark>`
+      (m) =>
+        `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`
     );
   };
 
-  // === DATUM ===
-  const standDatum = data?.stand_datum?.trim?.() || "Unbekannt";
+  const standDatum = data?.stand_datum || "Unbekannt";
 
   return (
-    <div className="min-h-screen bg-[#121212] text-gray-100 font-sans p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-yellow-400">
-          Ölpreis-Manager Pro
-        </h1>
+    <div style={styles.page}>
+      <h1 style={styles.title}>Ölpreis-Manager Pro</h1>
 
-        {/* DATENSTAND */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-300">
-          <span className="bg-gray-800 px-3 py-1 rounded-md shadow">
-            📅 <strong>Datenstand:</strong> {standDatum}
-          </span>
-        </div>
-
-        {/* SUCHFELD */}
-        <input
-          type="text"
-          placeholder="🔍 Suche nach Freigabe, Hersteller oder Artikelnummer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md p-2 mb-6 rounded-md bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-yellow-400 text-gray-200 placeholder-gray-400 focus:outline-none"
-        />
-
-        {/* TABELLE */}
-        {filtered.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-800">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-900 sticky top-0">
-                <tr>
-                  {[
-                    "Interne Nr.",
-                    "Artikelnummer",
-                    "Bezeichnung",
-                    "Freigaben",
-                    "Hersteller",
-                    "Kategorie",
-                    "EK (Netto)",
-                    "VK 1 (€)",
-                  ].map((col) => (
-                    <th
-                      key={col}
-                      className="px-3 py-2 text-left font-semibold text-gray-300 border-b border-gray-700"
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((oil, i) => (
-                  <tr
-                    key={i}
-                    className={`${
-                      i % 2 === 0 ? "bg-gray-800" : "bg-gray-850"
-                    } hover:bg-gray-700 transition-colors`}
-                  >
-                    <td className="px-3 py-2">{oil.interne_nummer}</td>
-                    <td className="px-3 py-2">{oil.artikelnummer}</td>
-                    <td
-                      className="px-3 py-2"
-                      dangerouslySetInnerHTML={{
-                        __html: highlight(oil.bezeichnung || ""),
-                      }}
-                    ></td>
-                    <td
-                      className="px-3 py-2"
-                      dangerouslySetInnerHTML={{
-                        __html: highlight(oil.freigaben || ""),
-                      }}
-                    ></td>
-                    <td className="px-3 py-2">{oil.hersteller}</td>
-                    <td className="px-3 py-2">{oil.kategorie}</td>
-                    <td className="px-3 py-2 text-right">
-                      {oil.nettopreis
-                        ? `${oil.nettopreis.toFixed(2)} €`
-                        : "–"}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "–"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="mt-8 text-gray-500 italic">
-            Keine Treffer oder keine Daten verfügbar.
-          </p>
-        )}
+      <div style={styles.infoBox}>
+        📅 <strong>Datenstand:</strong> {standDatum}
       </div>
+
+      <input
+        type="text"
+        placeholder="🔍 Suche nach Freigabe, Hersteller oder Artikelnummer..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={styles.search}
+      />
+
+      {filtered.length > 0 ? (
+        <div style={styles.tableContainer}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Interne Nr.</th>
+                <th style={styles.th}>Artikelnummer</th>
+                <th style={styles.th}>Bezeichnung</th>
+                <th style={styles.th}>Freigaben</th>
+                <th style={styles.th}>Hersteller</th>
+                <th style={styles.th}>Kategorie</th>
+                <th style={styles.th}>EK (Netto)</th>
+                <th style={styles.th}>VK1 (€)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((oil, i) => (
+                <tr
+                  key={i}
+                  style={i % 2 ? styles.trAlt : styles.tr}
+                  className="row"
+                >
+                  <td style={styles.td}>{oil.interne_nummer}</td>
+                  <td style={styles.td}>{oil.artikelnummer}</td>
+                  <td
+                    style={styles.td}
+                    dangerouslySetInnerHTML={{
+                      __html: highlight(oil.bezeichnung || ""),
+                    }}
+                  ></td>
+                  <td
+                    style={{ ...styles.td, maxWidth: 300, whiteSpace: "normal" }}
+                    dangerouslySetInnerHTML={{
+                      __html: highlight(oil.freigaben || ""),
+                    }}
+                  ></td>
+                  <td style={styles.td}>{oil.hersteller}</td>
+                  <td style={styles.td}>{oil.kategorie}</td>
+                  <td style={{ ...styles.td, textAlign: "right" }}>
+                    {oil.nettopreis
+                      ? `${oil.nettopreis.toFixed(2)} €`
+                      : "–"}
+                  </td>
+                  <td style={{ ...styles.td, textAlign: "right" }}>
+                    {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "–"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p style={styles.noData}>Keine Treffer oder keine Daten verfügbar.</p>
+      )}
     </div>
   );
 }
+
+const styles = {
+  page: {
+    backgroundColor: "#121212",
+    color: "#e0e0e0",
+    fontFamily: "Segoe UI, Roboto, sans-serif",
+    padding: "30px",
+    minHeight: "100vh",
+  },
+  title: {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "#ffeb3b",
+    marginBottom: "10px",
+  },
+  infoBox: {
+    backgroundColor: "#1e1e1e",
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    marginBottom: "15px",
+    color: "#ccc",
+  },
+  search: {
+    padding: "10px",
+    borderRadius: "6px",
+    width: "100%",
+    maxWidth: "420px",
+    border: "1px solid #444",
+    backgroundColor: "#1e1e1e",
+    color: "#e0e0e0",
+    marginBottom: "20px",
+  },
+  tableContainer: {
+    overflowX: "auto",
+    borderRadius: "8px",
+    border: "1px solid #333",
+    backgroundColor: "#1c1c1c",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  th: {
+    textAlign: "left",
+    backgroundColor: "#222",
+    color: "#ffeb3b",
+    padding: "10px",
+    borderBottom: "2px solid #333",
+    position: "sticky",
+    top: 0,
+  },
+  td: {
+    padding: "8px 10px",
+    borderBottom: "1px solid #333",
+    verticalAlign: "top",
+  },
+  tr: {
+    backgroundColor: "#1a1a1a",
+  },
+  trAlt: {
+    backgroundColor: "#181818",
+  },
+  noData: {
+    marginTop: "20px",
+    fontStyle: "italic",
+    color: "#aaa",
+  },
+};
 
 export default App;
