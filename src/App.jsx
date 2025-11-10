@@ -2,21 +2,30 @@ import React, { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
 function App() {
-  const [data, setData] = useState({ stand_datum: "unbekannt", daten: [] });
+  const [data, setData] = useState(null);
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
 
+  // === JSON LADEN ===
   useEffect(() => {
     fetch("./data/localdb.json")
       .then((res) => res.json())
       .then((json) => {
-        if (!json.daten) json.daten = [];
+        console.log("✅ JSON geladen:", json);
         setData(json);
-        setFiltered(json.daten);
+        if (json && json.daten) {
+          setFiltered(json.daten);
+        } else {
+          console.warn("⚠️ Keine gültigen Datensätze gefunden!");
+          setFiltered([]);
+        }
       })
-      .catch((err) => console.error("❌ Fehler beim Laden:", err));
+      .catch((err) => {
+        console.error("❌ Fehler beim Laden der localdb.json:", err);
+      });
   }, []);
 
+  // === SUCHE MIT FUZZY-LOGIK ===
   useEffect(() => {
     if (!data || !data.daten) return;
     const fuse = new Fuse(data.daten, {
@@ -31,66 +40,99 @@ function App() {
     }
   }, [search, data]);
 
+  // === HERVORHEBUNG IN DER SUCHE ===
   const highlight = (text) => {
+    if (!text) return "";
     if (!search) return text;
     const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(regex, (m) => `<mark style='background:yellow;'>${m}</mark>`);
+    return text.replace(regex, (match) => `<mark style="background:yellow">${match}</mark>`);
   };
 
+  // === FEHLER / KEINE DATEN ===
+  if (!data) {
+    return (
+      <div className="p-4 text-gray-600 font-sans">
+        <h1 className="text-xl font-semibold mb-2">Ölpreis-Manager Pro</h1>
+        <p>Daten werden geladen …</p>
+      </div>
+    );
+  }
+
+  // === DATENSTAND ERKENNEN ===
+  const standDatum =
+    (data.stand_datum && String(data.stand_datum).trim()) ||
+    (data["stand_datum"] && String(data["stand_datum"]).trim()) ||
+    "Unbekannt";
+
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: 20, background: "#111", color: "#eee", minHeight: "100vh" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 10 }}>Ölpreis-Manager Pro</h1>
-      <div style={{ background: "#222", padding: "6px 10px", borderRadius: 8, display: "inline-block", marginBottom: 15 }}>
-        📅 <b>Datenstand:</b> {data.stand_datum || "unbekannt"}
+    <div className="p-4 font-sans">
+      <h1 className="text-2xl font-bold mb-4">Ölpreis-Manager Pro</h1>
+
+      {/* 📅 DATUMSANZEIGE */}
+      <div className="mb-4 p-2 bg-gray-100 rounded-md text-gray-700 text-sm inline-block shadow-sm">
+        📅 <span className="font-semibold">Datenstand:</span> {standDatum}
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      {/* 🔍 SUCHE */}
+      <div className="mb-4">
         <input
           type="text"
-          placeholder="Suche nach Freigabe, Hersteller oder Artikelnummer..."
+          placeholder="Suche nach Freigabe, Hersteller, Artikelnummer..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "8px",
-            borderRadius: 6,
-            border: "1px solid #444",
-            width: 350,
-            background: "#222",
-            color: "#fff",
-          }}
+          className="border p-2 rounded w-full max-w-md shadow-sm"
         />
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", background: "#1a1a1a" }}>
-        <thead style={{ background: "#333", color: "#fff" }}>
-          <tr>
-            {["Interne Nr.", "Artikelnummer", "Bezeichnung", "Freigaben", "Hersteller", "Kategorie", "VK1 (€)"].map((h) => (
-              <th key={h} style={{ border: "1px solid #444", padding: 8, textAlign: "left" }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.length > 0 ? (
-            filtered.map((oil, i) => (
-              <tr key={i} style={{ borderBottom: "1px solid #333" }}>
-                <td style={{ padding: 6 }}>{oil.interne_nummer}</td>
-                <td style={{ padding: 6 }}>{oil.artikelnummer}</td>
-                <td style={{ padding: 6 }} dangerouslySetInnerHTML={{ __html: highlight(oil.bezeichnung || "") }} />
-                <td style={{ padding: 6 }} dangerouslySetInnerHTML={{ __html: highlight(oil.freigaben || "") }} />
-                <td style={{ padding: 6 }}>{oil.hersteller}</td>
-                <td style={{ padding: 6 }}>{oil.kategorie}</td>
-                <td style={{ padding: 6, textAlign: "right" }}>{oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "-"}</td>
-              </tr>
-            ))
-          ) : (
+      {/* 📋 TABELLE */}
+      {filtered.length > 0 ? (
+        <table className="min-w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-200">
             <tr>
-              <td colSpan="7" style={{ textAlign: "center", padding: 20, color: "#999" }}>
-                Keine Daten gefunden oder Datei leer.
-              </td>
+              <th className="border p-2 text-left">Interne Nr.</th>
+              <th className="border p-2 text-left">Artikelnummer</th>
+              <th className="border p-2 text-left">Hersteller</th>
+              <th className="border p-2 text-left w-56">Bezeichnung</th>
+              <th className="border p-2 text-left">Kategorie</th>
+              <th className="border p-2 text-left w-96">Freigaben</th>
+              <th className="border p-2 text-right">EK (Netto)</th>
+              <th className="border p-2 text-right">VK 1</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filtered.map((oil) => (
+              <tr key={oil.interne_nummer} className="hover:bg-gray-50">
+                <td className="border p-2">{oil.interne_nummer}</td>
+                <td className="border p-2">{oil.artikelnummer}</td>
+                <td className="border p-2">{oil.hersteller}</td>
+                <td
+                  className="border p-2"
+                  dangerouslySetInnerHTML={{
+                    __html: highlight(oil.bezeichnung || ""),
+                  }}
+                ></td>
+                <td className="border p-2">{oil.kategorie}</td>
+                <td
+                  className="border p-2"
+                  dangerouslySetInnerHTML={{
+                    __html: highlight(oil.freigaben || ""),
+                  }}
+                ></td>
+                <td className="border p-2 text-right">
+                  {oil.nettopreis ? `${oil.nettopreis.toFixed(2)} €` : "-"}
+                </td>
+                <td className="border p-2 text-right">
+                  {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "-"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="mt-4 text-gray-500 italic">
+          Keine Treffer oder keine Daten verfügbar.
+        </p>
+      )}
     </div>
   );
 }
