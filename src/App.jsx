@@ -20,7 +20,7 @@ function App() {
       });
   }, []);
 
-  // === SUCHE MIT FUZZY ===
+  // === FUZZY-SUCHE ===
   useEffect(() => {
     if (!data?.daten) return;
     const fuse = new Fuse(data.daten, {
@@ -35,78 +35,111 @@ function App() {
     }
   }, [search, data]);
 
-  // === TEXT HERVORHEBEN ===
+  // === HERVORHEBUNG ===
   const highlight = (text) => {
     if (!text) return "";
     if (!search) return text;
     const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(regex, (m) => `<mark style="background:yellow">${m}</mark>`);
+    return text.replace(
+      regex,
+      (m) => `<mark style="background:#ffd54f;color:black">${m}</mark>`
+    );
   };
 
-  // === DATUM LESEN ===
+  // === DATUM ===
   const standDatum = data?.stand_datum?.trim?.() || "Unbekannt";
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6 font-sans">
-      <h1 className="text-3xl font-bold mb-3 text-white">Ölpreis-Manager Pro</h1>
+    <div className="min-h-screen bg-[#121212] text-gray-100 font-sans p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4 text-yellow-400">
+          Ölpreis-Manager Pro
+        </h1>
 
-      {/* DATENSTAND */}
-      <div className="mb-4 p-2 bg-gray-800 rounded-md inline-block">
-        📅 <span className="font-semibold">Datenstand:</span> {standDatum}
-      </div>
+        {/* DATENSTAND */}
+        <div className="mb-6 flex items-center gap-2 text-sm text-gray-300">
+          <span className="bg-gray-800 px-3 py-1 rounded-md shadow">
+            📅 <strong>Datenstand:</strong> {standDatum}
+          </span>
+        </div>
 
-      {/* SUCHFELD */}
-      <div className="mb-4">
+        {/* SUCHFELD */}
         <input
           type="text"
-          placeholder="Suche nach Freigabe, Hersteller oder Artikelnummer..."
+          placeholder="🔍 Suche nach Freigabe, Hersteller oder Artikelnummer..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md p-2 rounded bg-gray-800 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full max-w-md p-2 mb-6 rounded-md bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-yellow-400 text-gray-200 placeholder-gray-400 focus:outline-none"
         />
-      </div>
 
-      {/* TABELLE */}
-      {filtered.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-gray-700">
-            <thead className="bg-gray-800 text-gray-300">
-              <tr>
-                <th className="border border-gray-700 p-2 text-left">Interne Nr.</th>
-                <th className="border border-gray-700 p-2 text-left">Artikelnummer</th>
-                <th className="border border-gray-700 p-2 text-left">Bezeichnung</th>
-                <th className="border border-gray-700 p-2 text-left">Freigaben</th>
-                <th className="border border-gray-700 p-2 text-left">Hersteller</th>
-                <th className="border border-gray-700 p-2 text-left">Kategorie</th>
-                <th className="border border-gray-700 p-2 text-right">VK1 (€)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((oil) => (
-                <tr key={oil.interne_nummer} className="hover:bg-gray-800">
-                  <td className="border border-gray-700 p-2">{oil.interne_nummer}</td>
-                  <td className="border border-gray-700 p-2">{oil.artikelnummer}</td>
-                  <td
-                    className="border border-gray-700 p-2"
-                    dangerouslySetInnerHTML={{ __html: highlight(oil.bezeichnung || "") }}
-                  ></td>
-                  <td
-                    className="border border-gray-700 p-2"
-                    dangerouslySetInnerHTML={{ __html: highlight(oil.freigaben || "") }}
-                  ></td>
-                  <td className="border border-gray-700 p-2">{oil.hersteller}</td>
-                  <td className="border border-gray-700 p-2">{oil.kategorie}</td>
-                  <td className="border border-gray-700 p-2 text-right">
-                    {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "-"}
-                  </td>
+        {/* TABELLE */}
+        {filtered.length > 0 ? (
+          <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-800">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-900 sticky top-0">
+                <tr>
+                  {[
+                    "Interne Nr.",
+                    "Artikelnummer",
+                    "Bezeichnung",
+                    "Freigaben",
+                    "Hersteller",
+                    "Kategorie",
+                    "EK (Netto)",
+                    "VK 1 (€)",
+                  ].map((col) => (
+                    <th
+                      key={col}
+                      className="px-3 py-2 text-left font-semibold text-gray-300 border-b border-gray-700"
+                    >
+                      {col}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="mt-6 text-gray-400 italic">Keine Treffer oder keine Daten verfügbar.</p>
-      )}
+              </thead>
+              <tbody>
+                {filtered.map((oil, i) => (
+                  <tr
+                    key={i}
+                    className={`${
+                      i % 2 === 0 ? "bg-gray-800" : "bg-gray-850"
+                    } hover:bg-gray-700 transition-colors`}
+                  >
+                    <td className="px-3 py-2">{oil.interne_nummer}</td>
+                    <td className="px-3 py-2">{oil.artikelnummer}</td>
+                    <td
+                      className="px-3 py-2"
+                      dangerouslySetInnerHTML={{
+                        __html: highlight(oil.bezeichnung || ""),
+                      }}
+                    ></td>
+                    <td
+                      className="px-3 py-2"
+                      dangerouslySetInnerHTML={{
+                        __html: highlight(oil.freigaben || ""),
+                      }}
+                    ></td>
+                    <td className="px-3 py-2">{oil.hersteller}</td>
+                    <td className="px-3 py-2">{oil.kategorie}</td>
+                    <td className="px-3 py-2 text-right">
+                      {oil.nettopreis
+                        ? `${oil.nettopreis.toFixed(2)} €`
+                        : "–"}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "–"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="mt-8 text-gray-500 italic">
+            Keine Treffer oder keine Daten verfügbar.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
