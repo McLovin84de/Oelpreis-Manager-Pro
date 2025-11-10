@@ -2,107 +2,96 @@ import React, { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
 function App() {
-  const [data, setData] = useState([]);
-  const [meta, setMeta] = useState({});
+  const [data, setData] = useState(null);
   const [search, setSearch] = useState("");
+  const [filtered, setFiltered] = useState([]);
 
   // JSON laden
   useEffect(() => {
     fetch("./data/localdb.json")
       .then((res) => res.json())
       .then((json) => {
-        if (Array.isArray(json)) {
-          setData(json);
-          setMeta({ stand_datum: "unbekannt" });
-        } else {
-          setData(json.daten || []);
-          setMeta({ stand_datum: json.stand_datum || "unbekannt" });
-        }
+        setData(json);
+        setFiltered(json.daten || []);
       })
       .catch((err) => console.error("Fehler beim Laden:", err));
   }, []);
 
   // Fuzzy Suche
-  const fuse = new Fuse(data, {
-    keys: ["freigaben", "bezeichnung", "hersteller", "artikelnummer"],
-    threshold: 0.3,
-  });
-  const results = search.trim()
-    ? fuse.search(search).map((r) => r.item)
-    : data;
+  useEffect(() => {
+    if (!data) return;
+    const fuse = new Fuse(data.daten, {
+      keys: ["freigaben", "bezeichnung", "hersteller", "artikelnummer"],
+      threshold: 0.3,
+    });
+    if (search.trim() === "") {
+      setFiltered(data.daten);
+    } else {
+      const results = fuse.search(search);
+      setFiltered(results.map((r) => r.item));
+    }
+  }, [search, data]);
 
-  // Treffer markieren
   const highlight = (text) => {
     if (!search) return text;
     const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(regex, (match) => `<mark style="background:yellow">${match}</mark>`);
+    return text.replace(regex, (m) => `<mark style="background:yellow">${m}</mark>`);
   };
 
-  if (!data.length) return <div className="p-4 text-gray-600">Lade Daten...</div>;
+  if (!data) return <div className="p-4 text-gray-600">Lade Daten...</div>;
 
   return (
-    <div className="p-4 font-sans">
-      <h1 className="text-2xl font-bold mb-4">Ölpreis-Manager Pro</h1>
+    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px", background: "#111", color: "#eee" }}>
+      <h1 style={{ fontSize: "28px", marginBottom: "10px", color: "#fff" }}>Ölpreis-Manager Pro</h1>
 
-      {/* Datum */}
-      <div className="mb-4 p-2 bg-gray-100 rounded-md text-gray-700 text-sm inline-block shadow-sm">
-        📅 <span className="font-semibold">Datenstand:</span> {meta.stand_datum}
+      {/* 📅 Datenstand */}
+      <div style={{ marginBottom: "15px", padding: "8px 12px", background: "#222", borderRadius: "8px", display: "inline-block" }}>
+        📅 <b>Datenstand:</b> {data.stand_datum ? data.stand_datum : "unbekannt"}
       </div>
 
-      {/* Suche */}
-      <div className="mb-4">
+      {/* 🔍 Suche */}
+      <div style={{ marginBottom: "15px" }}>
         <input
           type="text"
-          placeholder="Suche nach Freigabe, Hersteller, Artikelnummer..."
+          placeholder="Suche nach Freigabe, Hersteller oder Artikelnummer..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full max-w-md shadow-sm"
+          style={{
+            padding: "10px",
+            borderRadius: "6px",
+            border: "1px solid #444",
+            width: "350px",
+            background: "#222",
+            color: "#fff"
+          }}
         />
       </div>
 
       {/* Tabelle */}
-      <table className="min-w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+      <table style={{ width: "100%", borderCollapse: "collapse", background: "#1a1a1a" }}>
+        <thead style={{ background: "#333", color: "#fff" }}>
           <tr>
-            <th className="border p-2 text-left">Interne Nr.</th>
-            <th className="border p-2 text-left">Artikelnummer</th>
-            <th className="border p-2 text-left">Hersteller</th>
-            <th className="border p-2 text-left w-64">Bezeichnung</th>
-            <th className="border p-2 text-left w-96">Freigaben</th>
-            <th className="border p-2 text-left">Kategorie</th>
-            <th className="border p-2 text-right">EK (Netto)</th>
-            <th className="border p-2 text-right">VK 1</th>
+            {["Interne Nr.", "Artikelnummer", "Bezeichnung", "Freigaben", "Hersteller", "Kategorie", "VK1 (€)"].map((h) => (
+              <th key={h} style={{ border: "1px solid #444", padding: "8px", textAlign: "left" }}>{h}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {results.map((oil) => (
-            <tr key={oil.interne_nummer} className="hover:bg-gray-50">
-              <td className="border p-2">{oil.interne_nummer}</td>
-              <td className="border p-2">{oil.artikelnummer}</td>
-              <td className="border p-2">{oil.hersteller}</td>
-              <td
-                className="border p-2"
-                dangerouslySetInnerHTML={{ __html: highlight(oil.bezeichnung || "") }}
-              ></td>
-              <td
-                className="border p-2"
-                dangerouslySetInnerHTML={{ __html: highlight((oil.freigaben || []).join(", ")) }}
-              ></td>
-              <td className="border p-2">{oil.kategorie}</td>
-              <td className="border p-2 text-right">
-                {oil.nettopreis ? `${oil.nettopreis.toFixed(2)} €` : "-"}
-              </td>
-              <td className="border p-2 text-right">
-                {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "-"}
-              </td>
+          {filtered.map((oil) => (
+            <tr key={oil.interne_nummer} style={{ borderBottom: "1px solid #333" }}>
+              <td style={{ padding: "6px" }}>{oil.interne_nummer}</td>
+              <td style={{ padding: "6px" }}>{oil.artikelnummer}</td>
+              <td style={{ padding: "6px" }} dangerouslySetInnerHTML={{ __html: highlight(oil.bezeichnung || "") }} />
+              <td style={{ padding: "6px" }} dangerouslySetInnerHTML={{ __html: highlight(oil.freigaben || "") }} />
+              <td style={{ padding: "6px" }}>{oil.hersteller}</td>
+              <td style={{ padding: "6px" }}>{oil.kategorie}</td>
+              <td style={{ padding: "6px", textAlign: "right" }}>{oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "-"}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {results.length === 0 && (
-        <p className="mt-4 text-gray-500 italic">Keine Treffer gefunden.</p>
-      )}
+      {filtered.length === 0 && <p style={{ marginTop: "20px", color: "#aaa" }}>Keine Treffer gefunden.</p>}
     </div>
   );
 }
