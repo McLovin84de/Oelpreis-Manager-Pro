@@ -30,7 +30,6 @@ const highlightText = (text, query) => {
   const startIndex = normText.indexOf(normQuery);
   if (startIndex === -1) return text;
 
-  // Berechne die Position im Originaltext
   const originalStart = findOriginalIndex(text.toLowerCase(), startIndex);
   const originalEnd = findOriginalIndex(text.toLowerCase(), startIndex + normQuery.length);
 
@@ -120,6 +119,11 @@ function App() {
     setFiltered(exactResults.length > 0 ? exactResults : fuzzyResults);
   };
 
+  const resetSearch = () => {
+    setSearch("");
+    setFiltered(data);
+  };
+
   if (loading)
     return <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>;
   if (error)
@@ -140,24 +144,43 @@ function App() {
         Aktuelle Daten aus der WAP-Exportdatei
       </p>
 
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-        placeholder="Suchen nach Freigaben, Hersteller, Artikelnummer..."
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          padding: "8px",
-          marginBottom: "20px",
-          borderRadius: "6px",
-          border: "1px solid #555",
-          backgroundColor: "#222",
-          color: "white",
-        }}
-      />
+      <div style={{ position: "relative", width: "100%", maxWidth: "500px" }}>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Suchen nach Freigaben, Hersteller, Artikelnummer..."
+          style={{
+            width: "100%",
+            padding: "8px 35px 8px 10px",
+            borderRadius: "6px",
+            border: "1px solid #555",
+            backgroundColor: "#222",
+            color: "white",
+          }}
+        />
+        {search && (
+          <button
+            onClick={resetSearch}
+            style={{
+              position: "absolute",
+              right: "8px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              color: "#ccc",
+              fontSize: "16px",
+              cursor: "pointer",
+            }}
+            title="Suche löschen"
+          >
+            ❌
+          </button>
+        )}
+      </div>
 
-      <div style={{ overflowX: "auto" }}>
+      <div style={{ overflowX: "auto", marginTop: "20px" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "#222" }}>
