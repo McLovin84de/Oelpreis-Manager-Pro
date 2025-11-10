@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// einfache unscharfe Suche: prüft, ob alle Zeichen der Suche in der richtigen Reihenfolge im Text vorkommen
+// unscharfe Suche
 const fuzzyMatch = (text, query) => {
   if (!text) return false;
   text = text.toLowerCase();
@@ -14,6 +14,21 @@ const fuzzyMatch = (text, query) => {
   return true;
 };
 
+// Text-Hervorhebung (markiert alle Trefferstellen)
+const highlightText = (text, query) => {
+  if (!text || !query) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  return text.split(regex).map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} style={{ backgroundColor: "#ffd54f", color: "black" }}>
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+};
+
 function App() {
   const [data, setData] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -21,7 +36,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Daten aus public/data/localdb.json laden
   useEffect(() => {
     fetch("/data/localdb.json")
       .then((res) => {
@@ -43,20 +57,16 @@ function App() {
   const handleSearch = (value) => {
     setSearch(value);
     const query = value.trim().toLowerCase();
-
-    // wenn leer → alles anzeigen
     if (!query) {
       setFiltered(data);
       return;
     }
 
     const result = data.filter((öl) => {
-      // freigaben können array oder string sein → immer in string umwandeln
       const freigabenStr = Array.isArray(öl.freigaben)
         ? öl.freigaben.join(", ")
         : (öl.freigaben || "");
-
-      const felder = [
+      const fields = [
         freigabenStr,
         öl.hersteller || "",
         öl.bezeichnung || "",
@@ -64,27 +74,14 @@ function App() {
         öl.artikelnummer || "",
         öl.interne_nummer || "",
       ].map((f) => f.toLowerCase());
-
-      // harte Includes oder fuzzy – beides ok
-      return felder.some(
-        (f) => f.includes(query) || fuzzyMatch(f, query)
-      );
+      return fields.some((f) => f.includes(query) || fuzzyMatch(f, query));
     });
 
     setFiltered(result);
   };
 
-  if (loading) {
-    return (
-      <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>
-    );
-  }
+  if (loading) return <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>;
+  if (error) return <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>;
 
   return (
     <div
@@ -97,15 +94,13 @@ function App() {
       }}
     >
       <h1 style={{ marginBottom: "5px" }}>Ölpreis-Manager Pro</h1>
-      <p style={{ color: "#aaa", marginBottom: "15px" }}>
-        Aktuelle Daten aus der WAP-Exportdatei
-      </p>
+      <p style={{ color: "#aaa", marginBottom: "15px" }}>Aktuelle Daten aus der WAP-Exportdatei</p>
 
       <input
         type="text"
         value={search}
         onChange={(e) => handleSearch(e.target.value)}
-        placeholder="Suchen nach Freigaben (z.B. WSS-M2C...), Hersteller, Artikelnummer..."
+        placeholder="Suchen nach Freigaben, Hersteller, Artikelnummer..."
         style={{
           width: "100%",
           maxWidth: "500px",
@@ -122,41 +117,13 @@ function App() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "#222" }}>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
-                Interne Nr.
-              </th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
-                Artikelnummer
-              </th>
-              <th
-                style={{
-                  borderBottom: "1px solid #444",
-                  padding: "8px",
-                  textAlign: "left",
-                  width: "20%",
-                }}
-              >
-                Bezeichnung
-              </th>
-              <th
-                style={{
-                  borderBottom: "1px solid #444",
-                  padding: "8px",
-                  textAlign: "left",
-                  width: "25%",
-                }}
-              >
-                Freigaben
-              </th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
-                Hersteller
-              </th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
-                Kategorie
-              </th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "right" }}>
-                VK1 (€)
-              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Interne Nr.</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Artikelnummer</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "20%", textAlign: "left" }}>Bezeichnung</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "25%", textAlign: "left" }}>Freigaben</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Hersteller</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Kategorie</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "right" }}>VK1 (€)</th>
             </tr>
           </thead>
           <tbody>
@@ -176,27 +143,15 @@ function App() {
                       backgroundColor: i % 2 === 0 ? "#181818" : "#121212",
                     }}
                   >
-                    <td style={{ padding: "6px 8px" }}>
-                      {öl.interne_nummer || "–"}
-                    </td>
-                    <td style={{ padding: "6px 8px" }}>
-                      {öl.artikelnummer || "–"}
-                    </td>
-                    <td style={{ padding: "6px 8px" }}>
-                      {öl.bezeichnung || "–"}
-                    </td>
+                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.interne_nummer || "–", search)}</td>
+                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.artikelnummer || "–", search)}</td>
+                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.bezeichnung || "–", search)}</td>
                     <td style={{ padding: "6px 8px", whiteSpace: "pre-wrap" }}>
-                      {freigabenStr}
+                      {highlightText(freigabenStr, search)}
                     </td>
-                    <td style={{ padding: "6px 8px" }}>
-                      {öl.hersteller || "–"}
-                    </td>
-                    <td style={{ padding: "6px 8px" }}>
-                      {öl.kategorie || "–"}
-                    </td>
-                    <td style={{ padding: "6px 8px", textAlign: "right" }}>
-                      {vkDisplay}
-                    </td>
+                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.hersteller || "–", search)}</td>
+                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.kategorie || "–", search)}</td>
+                    <td style={{ padding: "6px 8px", textAlign: "right" }}>{vkDisplay}</td>
                   </tr>
                 );
               })
