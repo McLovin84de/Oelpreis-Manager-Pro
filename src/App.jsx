@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// einfache Fuzzy-Suche (unscharf, toleriert Tippfehler und Teilbegriffe)
+// einfache unscharfe Suche: prüft, ob alle Zeichen der Suche in der richtigen Reihenfolge im Text vorkommen
 const fuzzyMatch = (text, query) => {
   if (!text) return false;
   text = text.toLowerCase();
@@ -21,6 +21,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Daten aus public/data/localdb.json laden
   useEffect(() => {
     fetch("/data/localdb.json")
       .then((res) => {
@@ -41,30 +42,49 @@ function App() {
 
   const handleSearch = (value) => {
     setSearch(value);
-    if (!value.trim()) {
+    const query = value.trim().toLowerCase();
+
+    // wenn leer → alles anzeigen
+    if (!query) {
       setFiltered(data);
       return;
     }
 
-    const lower = value.toLowerCase();
-
     const result = data.filter((öl) => {
-      const fields = [
-        öl.freigaben || "",
+      // freigaben können array oder string sein → immer in string umwandeln
+      const freigabenStr = Array.isArray(öl.freigaben)
+        ? öl.freigaben.join(", ")
+        : (öl.freigaben || "");
+
+      const felder = [
+        freigabenStr,
         öl.hersteller || "",
         öl.bezeichnung || "",
         öl.kategorie || "",
         öl.artikelnummer || "",
         öl.interne_nummer || "",
-      ];
-      return fields.some((field) => fuzzyMatch(field, lower));
+      ].map((f) => f.toLowerCase());
+
+      // harte Includes oder fuzzy – beides ok
+      return felder.some(
+        (f) => f.includes(query) || fuzzyMatch(f, query)
+      );
     });
 
     setFiltered(result);
   };
 
-  if (loading) return <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>;
-  if (error) return <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>;
+  if (loading) {
+    return (
+      <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>
+    );
+  }
 
   return (
     <div
@@ -85,7 +105,7 @@ function App() {
         type="text"
         value={search}
         onChange={(e) => handleSearch(e.target.value)}
-        placeholder="Suchen nach Freigaben, Hersteller, Bezeichnung, Kategorie..."
+        placeholder="Suchen nach Freigaben (z.B. WSS-M2C...), Hersteller, Artikelnummer..."
         style={{
           width: "100%",
           maxWidth: "500px",
@@ -113,7 +133,7 @@ function App() {
                   borderBottom: "1px solid #444",
                   padding: "8px",
                   textAlign: "left",
-                  width: "25%",
+                  width: "20%",
                 }}
               >
                 Bezeichnung
@@ -144,6 +164,9 @@ function App() {
               filtered.map((öl, i) => {
                 const vk1 = parseFloat(öl.vk1);
                 const vkDisplay = isNaN(vk1) ? "–" : vk1.toFixed(2);
+                const freigabenStr = Array.isArray(öl.freigaben)
+                  ? öl.freigaben.join(", ")
+                  : (öl.freigaben || "–");
 
                 return (
                   <tr
@@ -153,15 +176,27 @@ function App() {
                       backgroundColor: i % 2 === 0 ? "#181818" : "#121212",
                     }}
                   >
-                    <td style={{ padding: "6px 8px" }}>{öl.interne_nummer || "–"}</td>
-                    <td style={{ padding: "6px 8px" }}>{öl.artikelnummer || "–"}</td>
-                    <td style={{ padding: "6px 8px" }}>{öl.bezeichnung || "–"}</td>
-                    <td style={{ padding: "6px 8px", whiteSpace: "pre-wrap" }}>
-                      {öl.freigaben || "–"}
+                    <td style={{ padding: "6px 8px" }}>
+                      {öl.interne_nummer || "–"}
                     </td>
-                    <td style={{ padding: "6px 8px" }}>{öl.hersteller || "–"}</td>
-                    <td style={{ padding: "6px 8px" }}>{öl.kategorie || "–"}</td>
-                    <td style={{ padding: "6px 8px", textAlign: "right" }}>{vkDisplay}</td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {öl.artikelnummer || "–"}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {öl.bezeichnung || "–"}
+                    </td>
+                    <td style={{ padding: "6px 8px", whiteSpace: "pre-wrap" }}>
+                      {freigabenStr}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {öl.hersteller || "–"}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {öl.kategorie || "–"}
+                    </td>
+                    <td style={{ padding: "6px 8px", textAlign: "right" }}>
+                      {vkDisplay}
+                    </td>
                   </tr>
                 );
               })
