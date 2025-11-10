@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 
-// 🧠 Unscharfe Suche (Backup bei Tippfehlern)
+// 🔍 Vereinheitlichung von Text (entfernt Punkte, Bindestriche & Leerzeichen)
+const normalize = (text) => {
+  if (!text) return "";
+  return text.toLowerCase().replace(/[\s.\-]/g, "");
+};
+
+// 🔠 Unscharfe Suche (Backup bei Tippfehlern)
 const fuzzyMatch = (text, query) => {
   if (!text) return false;
-  text = text.toLowerCase();
-  query = query.toLowerCase();
+  text = normalize(text);
+  query = normalize(query);
   let ti = 0;
   for (let qi = 0; qi < query.length; qi++) {
     ti = text.indexOf(query[qi], ti);
@@ -14,7 +20,7 @@ const fuzzyMatch = (text, query) => {
   return true;
 };
 
-// 🔆 Text-Hervorhebung der Suchtreffer
+// ✨ Text-Hervorhebung der Treffer
 const highlightText = (text, query) => {
   if (!text || !query) return text;
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
@@ -55,10 +61,10 @@ function App() {
       });
   }, []);
 
-  // 🔍 Zweistufige Suche (erst exakt, dann fuzzy)
+  // 🔎 Zweistufige Suche (exakt → fuzzy, Punkte & Bindestriche ignoriert)
   const handleSearch = (value) => {
     setSearch(value);
-    const query = value.trim().toLowerCase();
+    const query = normalize(value.trim());
     if (!query) {
       setFiltered(data);
       return;
@@ -78,11 +84,14 @@ function App() {
         öl.kategorie || "",
         öl.artikelnummer || "",
         öl.interne_nummer || "",
-      ].map((f) => f.toLowerCase());
+      ];
 
-      if (fields.some((f) => f.includes(query))) {
+      // Normalisierte Felder für Vergleich
+      const normalizedFields = fields.map((f) => normalize(f));
+
+      if (normalizedFields.some((f) => f.includes(query))) {
         exactResults.push(öl);
-      } else if (fields.some((f) => fuzzyMatch(f, query))) {
+      } else if (normalizedFields.some((f) => fuzzyMatch(f, query))) {
         fuzzyResults.push(öl);
       }
     });
