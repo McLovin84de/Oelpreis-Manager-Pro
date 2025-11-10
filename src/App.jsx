@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// unscharfe Suche
+// 🧠 Unscharfe Suche (Backup bei Tippfehlern)
 const fuzzyMatch = (text, query) => {
   if (!text) return false;
   text = text.toLowerCase();
@@ -14,7 +14,7 @@ const fuzzyMatch = (text, query) => {
   return true;
 };
 
-// Text-Hervorhebung (markiert alle Trefferstellen)
+// 🔆 Text-Hervorhebung der Suchtreffer
 const highlightText = (text, query) => {
   if (!text || !query) return text;
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
@@ -36,6 +36,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 📦 JSON laden
   useEffect(() => {
     fetch("/data/localdb.json")
       .then((res) => {
@@ -54,6 +55,7 @@ function App() {
       });
   }, []);
 
+  // 🔍 Zweistufige Suche (erst exakt, dann fuzzy)
   const handleSearch = (value) => {
     setSearch(value);
     const query = value.trim().toLowerCase();
@@ -62,7 +64,10 @@ function App() {
       return;
     }
 
-    const result = data.filter((öl) => {
+    const exactResults = [];
+    const fuzzyResults = [];
+
+    data.forEach((öl) => {
       const freigabenStr = Array.isArray(öl.freigaben)
         ? öl.freigaben.join(", ")
         : (öl.freigaben || "");
@@ -74,14 +79,21 @@ function App() {
         öl.artikelnummer || "",
         öl.interne_nummer || "",
       ].map((f) => f.toLowerCase());
-      return fields.some((f) => f.includes(query) || fuzzyMatch(f, query));
+
+      if (fields.some((f) => f.includes(query))) {
+        exactResults.push(öl);
+      } else if (fields.some((f) => fuzzyMatch(f, query))) {
+        fuzzyResults.push(öl);
+      }
     });
 
-    setFiltered(result);
+    setFiltered(exactResults.length > 0 ? exactResults : fuzzyResults);
   };
 
-  if (loading) return <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>;
-  if (error) return <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>;
+  if (loading)
+    return <div style={{ color: "white", padding: 20 }}>Daten werden geladen...</div>;
+  if (error)
+    return <div style={{ color: "red", padding: 20 }}>Fehler: {error}</div>;
 
   return (
     <div
@@ -94,7 +106,9 @@ function App() {
       }}
     >
       <h1 style={{ marginBottom: "5px" }}>Ölpreis-Manager Pro</h1>
-      <p style={{ color: "#aaa", marginBottom: "15px" }}>Aktuelle Daten aus der WAP-Exportdatei</p>
+      <p style={{ color: "#aaa", marginBottom: "15px" }}>
+        Aktuelle Daten aus der WAP-Exportdatei
+      </p>
 
       <input
         type="text"
@@ -117,13 +131,27 @@ function App() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "#222" }}>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Interne Nr.</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Artikelnummer</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "20%", textAlign: "left" }}>Bezeichnung</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "25%", textAlign: "left" }}>Freigaben</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Hersteller</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>Kategorie</th>
-              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "right" }}>VK1 (€)</th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
+                Interne Nr.
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
+                Artikelnummer
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "20%", textAlign: "left" }}>
+                Bezeichnung
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", width: "25%", textAlign: "left" }}>
+                Freigaben
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
+                Hersteller
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "left" }}>
+                Kategorie
+              </th>
+              <th style={{ borderBottom: "1px solid #444", padding: "8px", textAlign: "right" }}>
+                VK1 (€)
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -143,21 +171,36 @@ function App() {
                       backgroundColor: i % 2 === 0 ? "#181818" : "#121212",
                     }}
                   >
-                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.interne_nummer || "–", search)}</td>
-                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.artikelnummer || "–", search)}</td>
-                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.bezeichnung || "–", search)}</td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {highlightText(öl.interne_nummer || "–", search)}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {highlightText(öl.artikelnummer || "–", search)}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {highlightText(öl.bezeichnung || "–", search)}
+                    </td>
                     <td style={{ padding: "6px 8px", whiteSpace: "pre-wrap" }}>
                       {highlightText(freigabenStr, search)}
                     </td>
-                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.hersteller || "–", search)}</td>
-                    <td style={{ padding: "6px 8px" }}>{highlightText(öl.kategorie || "–", search)}</td>
-                    <td style={{ padding: "6px 8px", textAlign: "right" }}>{vkDisplay}</td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {highlightText(öl.hersteller || "–", search)}
+                    </td>
+                    <td style={{ padding: "6px 8px" }}>
+                      {highlightText(öl.kategorie || "–", search)}
+                    </td>
+                    <td style={{ padding: "6px 8px", textAlign: "right" }}>
+                      {vkDisplay}
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan="7" style={{ textAlign: "center", padding: "15px", color: "#888" }}>
+                <td
+                  colSpan="7"
+                  style={{ textAlign: "center", padding: "15px", color: "#888" }}
+                >
                   Keine passenden Ergebnisse gefunden.
                 </td>
               </tr>
