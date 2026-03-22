@@ -1,8 +1,18 @@
 {
-  "stand_datum": "2025-11-10 05:48",
+  "stand_datum": "2026-03-22 02:33",
   "daten": [
     {
       "interne_nummer": "OEL-001",
+      "artikelnummer": "393005",
+      "hersteller": "EUROLUB",
+      "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 42.64,
+      "vk1": 125.0
+    },
+    {
+      "interne_nummer": "OEL-002",
       "artikelnummer": "211006",
       "hersteller": "EUROLUB",
       "bezeichnung": "Motoröl 6L Longlife/Spezial 5W-30",
@@ -10,16 +20,6 @@
       "kategorie": "",
       "nettopreis": 38.5,
       "vk1": 150.0
-    },
-    {
-      "interne_nummer": "OEL-002",
-      "artikelnummer": "212001",
-      "hersteller": "EUROLUB",
-      "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
-      "freigaben": "",
-      "kategorie": "",
-      "nettopreis": 8.05,
-      "vk1": 25.0
     },
     {
       "interne_nummer": "OEL-003",
@@ -283,6 +283,16 @@
     },
     {
       "interne_nummer": "OEL-029",
+      "artikelnummer": "20372-0050-99",
+      "hersteller": "ROWE",
+      "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 31.07,
+      "vk1": 125.0
+    },
+    {
+      "interne_nummer": "OEL-030",
       "artikelnummer": "550048040",
       "hersteller": "SHELL",
       "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-20",
@@ -292,7 +302,7 @@
       "vk1": 25.0
     },
     {
-      "interne_nummer": "OEL-030",
+      "interne_nummer": "OEL-031",
       "artikelnummer": "550065928",
       "hersteller": "SHELL",
       "bezeichnung": "Motoröl 5L Premium/Hochleistung 0W-40",
@@ -302,7 +312,7 @@
       "vk1": 175.0
     },
     {
-      "interne_nummer": "OEL-031",
+      "interne_nummer": "OEL-032",
       "artikelnummer": "550053643",
       "hersteller": "SHELL",
       "bezeichnung": "Motoröl 1L Premium/Hochleistung 0W-20",
@@ -312,7 +322,7 @@
       "vk1": 35.0
     },
     {
-      "interne_nummer": "OEL-032",
+      "interne_nummer": "OEL-033",
       "artikelnummer": "109671",
       "hersteller": "MOTUL",
       "bezeichnung": "Motoröl 1l Longlife/Spezial 0W-30",
@@ -322,7 +332,7 @@
       "vk1": 25.0
     },
     {
-      "interne_nummer": "OEL-033",
+      "interne_nummer": "OEL-034",
       "artikelnummer": "243208",
       "hersteller": "EUROLUB",
       "bezeichnung": "Motoröl Fassware Longlife/Spezial 0W-30",
@@ -332,7 +342,7 @@
       "vk1": 25.0
     },
     {
-      "interne_nummer": "OEL-034",
+      "interne_nummer": "OEL-035",
       "artikelnummer": "00101610",
       "hersteller": "Eni",
       "bezeichnung": "Motoröl Fassware Longlife/Spezial 5W-30",
@@ -342,7 +352,7 @@
       "vk1": 25.0
     },
     {
-      "interne_nummer": "OEL-035",
+      "interne_nummer": "OEL-036",
       "artikelnummer": "00102310",
       "hersteller": "Eni",
       "bezeichnung": "Motoröl Fassware Standard 5W-40",
@@ -352,7 +362,7 @@
       "vk1": 17.5
     },
     {
-      "interne_nummer": "OEL-036",
+      "interne_nummer": "OEL-037",
       "artikelnummer": "08232-P99L2LHE",
       "hersteller": "Honda",
       "bezeichnung": "Motoröl Fassware Standard 10W-40",
@@ -362,7 +372,27 @@
       "vk1": 17.5
     },
     {
-      "interne_nummer": "OEL-037",
+      "interne_nummer": "OEL-038",
+      "artikelnummer": "214005",
+      "hersteller": "EUROLUB",
+      "bezeichnung": "Motoröl 5L Longlife/Spezial 5W-30 (Ford WSS-",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 29.5,
+      "vk1": 125.0
+    },
+    {
+      "interne_nummer": "OEL-039",
+      "artikelnummer": "393001",
+      "hersteller": "EUROLUB",
+      "bezeichnung": "Motoröl 1L Longlife/Spezial 5W-30",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 8.85,
+      "vk1": 25.0
+    },
+    {
+      "interne_nummer": "OEL-040",
       "artikelnummer": "V10-72-0141",
       "hersteller": "VEMO",
       "bezeichnung": "Sensor, Motorölstand Original VEMO Qualität",
@@ -370,6 +400,26 @@
       "kategorie": "",
       "nettopreis": 86.19,
       "vk1": 110.5
+    },
+    {
+      "interne_nummer": "OEL-041",
+      "artikelnummer": "212001",
+      "hersteller": "EUROLUB",
+      "bezeichnung": "Motoröl 1L Longlife/Spezial 0W-30",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 8.05,
+      "vk1": 25.0
+    },
+    {
+      "interne_nummer": "OEL-042",
+      "artikelnummer": "212005",
+      "hersteller": "EUROLUB",
+      "bezeichnung": "Motoröl 5L Longlife/Spezial 0W-30",
+      "freigaben": "",
+      "kategorie": "",
+      "nettopreis": 38.64,
+      "vk1": 125.0
     }
   ]
 }
