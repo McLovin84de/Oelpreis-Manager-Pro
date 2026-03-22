@@ -2,39 +2,96 @@ import React, { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
 function App() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
+
+  // Datensätze vereinheitlichen
+  const normalizeOil = (oil) => {
+    const freigaben = Array.isArray(oil.freigaben)
+      ? oil.freigaben.join(", ")
+      : oil.freigaben || "";
+
+    const nettopreisRaw =
+      oil.nettopreis ??
+      oil.nettopreislieferant ??
+      oil.nettopreis_lieferant ??
+      null;
+
+    const nettopreis =
+      nettopreisRaw !== null && nettopreisRaw !== undefined && nettopreisRaw !== ""
+        ? Number(String(nettopreisRaw).replace(",", "."))
+        : null;
+
+    const vk1 =
+      oil.vk1 !== null && oil.vk1 !== undefined && oil.vk1 !== ""
+        ? Number(String(oil.vk1).replace(",", "."))
+        : null;
+
+    return {
+      ...oil,
+      freigaben,
+      nettopreis,
+      vk1,
+    };
+  };
 
   // JSON laden
   useEffect(() => {
     fetch("/data/localdb.json")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP-Fehler: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((json) => {
         console.log("✅ JSON geladen:", json);
-        setData(json);
-        setFiltered(json?.daten || []);
+
+        const daten = Array.isArray(json?.daten)
+          ? json.daten.map(normalizeOil)
+          : [];
+
+        setData({
+          stand_datum: json?.stand_datum || "Unbekannt",
+          daten,
+        });
+
+        setFiltered(daten);
       })
-      .catch((err) => console.error("❌ Fehler beim Laden der JSON:", err));
+      .catch((err) => {
+        console.error("❌ Fehler beim Laden der JSON:", err);
+        setData({ stand_datum: "Unbekannt", daten: [] });
+        setFiltered([]);
+      });
   }, []);
 
   // Fuzzy Suche
   useEffect(() => {
-    if (!data?.daten) return;
+    if (!data?.daten?.length) return;
+
     const fuse = new Fuse(data.daten, {
       keys: ["freigaben", "bezeichnung", "hersteller", "artikelnummer"],
       threshold: 0.3,
     });
-    if (!search.trim()) setFiltered(data.daten);
-    else setFiltered(fuse.search(search).map((r) => r.item));
+
+    if (!search.trim()) {
+      setFiltered(data.daten);
+    } else {
+      setFiltered(fuse.search(search).map((r) => r.item));
+    }
   }, [search, data]);
 
   // Hervorhebung
   const highlight = (text) => {
-    if (!text) return "";
-    if (!search) return text;
-    const regex = new RegExp(`(${search})`, "gi");
-    return text.replace(
+    const safeText = Array.isArray(text) ? text.join(", ") : String(text || "");
+    if (!safeText) return "";
+    if (!search) return safeText;
+
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escapedSearch})`, "gi");
+
+    return safeText.replace(
       regex,
       (m) =>
         `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`
@@ -86,24 +143,26 @@ function App() {
                   <td
                     style={styles.td}
                     dangerouslySetInnerHTML={{
-                      __html: highlight(oil.bezeichnung || ""),
+                      __html: highlight(oil.bezeichnung),
                     }}
-                  ></td>
+                  />
                   <td
                     style={{ ...styles.td, maxWidth: 300, whiteSpace: "normal" }}
                     dangerouslySetInnerHTML={{
-                      __html: highlight(oil.freigaben || ""),
+                      __html: highlight(oil.freigaben),
                     }}
-                  ></td>
+                  />
                   <td style={styles.td}>{oil.hersteller}</td>
                   <td style={styles.td}>{oil.kategorie}</td>
                   <td style={{ ...styles.td, textAlign: "right" }}>
-                    {oil.nettopreis
+                    {typeof oil.nettopreis === "number" && !Number.isNaN(oil.nettopreis)
                       ? `${oil.nettopreis.toFixed(2)} €`
                       : "–"}
                   </td>
                   <td style={{ ...styles.td, textAlign: "right" }}>
-                    {oil.vk1 ? `${oil.vk1.toFixed(2)} €` : "–"}
+                    {typeof oil.vk1 === "number" && !Number.isNaN(oil.vk1)
+                      ? `${oil.vk1.toFixed(2)} €`
+                      : "–"}
                   </td>
                 </tr>
               ))}

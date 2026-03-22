@@ -1,4 +1,6 @@
-[
+{
+  "stand_datum": "22.03.2026",
+  "daten":[
   {
     "interne_nummer": "OEL-001",
     "artikelnummer": "211006",
@@ -552,4 +554,4 @@
     "status": "Unvollständig",
     "unvollstaendig": "Freigaben"
   }
-]
+]}
