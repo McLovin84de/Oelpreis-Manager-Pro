@@ -151,8 +151,10 @@ function App() {
   const highlight = (text) => {
     const rawText = Array.isArray(text) ? text.join(", ") : String(text || "");
     if (!rawText) return "";
+
     const safeText = escapeHtml(rawText);
     if (!search) return safeText;
+
     const escapedSearch = escapeHtml(search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(`(${escapedSearch})`, "gi");
     return safeText.replace(regex, (m) => `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`);
