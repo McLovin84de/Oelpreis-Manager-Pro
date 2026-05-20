@@ -22,14 +22,18 @@ function App() {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
+  const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== "";
+
   const formatEuro = (value) => {
+    if (!hasValue(value)) return "–";
     const n = toNumber(value);
-    return n ? `${n.toFixed(2)} €` : "–";
+    return `${n.toFixed(2)} €`;
   };
 
   const formatPercent = (value) => {
+    if (!hasValue(value)) return "–";
     const n = toNumber(value);
-    return Number.isFinite(n) ? `${n.toFixed(1)} %` : "–";
+    return `${n.toFixed(1)} %`;
   };
 
   const getEk = (oil) => toNumber(oil.nettopreis ?? oil.nettopreislieferant ?? oil.nettopreis_lieferant);
