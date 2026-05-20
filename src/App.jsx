@@ -28,11 +28,48 @@ function App() {
         ? Number(String(oil.vk1).replace(",", "."))
         : null;
 
+    const marginEuro =
+      typeof vk1 === "number" &&
+      !Number.isNaN(vk1) &&
+      typeof nettopreis === "number" &&
+      !Number.isNaN(nettopreis)
+        ? vk1 - nettopreis
+        : null;
+
+    const marginPercent =
+      marginEuro !== null && nettopreis > 0 ? (marginEuro / nettopreis) * 100 : null;
+
+    const extractLiters = (input) => {
+      const text = String(input || "").toLowerCase();
+      const packMatch = text.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*l\b/);
+      if (packMatch) {
+        const packs = Number(packMatch[1].replace(",", "."));
+        const litersEach = Number(packMatch[2].replace(",", "."));
+        if (!Number.isNaN(packs) && !Number.isNaN(litersEach) && packs > 0 && litersEach > 0) {
+          return packs * litersEach;
+        }
+      }
+
+      const singleMatch = text.match(/(\d+(?:[.,]\d+)?)\s*l\b/);
+      if (!singleMatch) return null;
+
+      const liters = Number(singleMatch[1].replace(",", "."));
+      return !Number.isNaN(liters) && liters > 0 ? liters : null;
+    };
+
+    const liters = extractLiters(oil.bezeichnung);
+    const marginPerLiter =
+      marginEuro !== null && liters && liters > 0 ? marginEuro / liters : null;
+
     return {
       ...oil,
       freigaben,
       nettopreis,
       vk1,
+      marginEuro,
+      marginPercent,
+      liters,
+      marginPerLiter,
     };
   };
 
@@ -138,7 +175,7 @@ function App() {
                 <th style={styles.th}>Hersteller</th>
                 <th style={styles.th}>Kategorie</th>
                 <th style={styles.th}>EK (Netto)</th>
-                <th style={styles.th}>VK1 (€)</th>
+                <th style={styles.th}>VK1 + Marge</th>
               </tr>
             </thead>
             <tbody>
@@ -169,10 +206,26 @@ function App() {
                       ? `${oil.nettopreis.toFixed(2)} €`
                       : "–"}
                   </td>
-                  <td style={{ ...styles.td, textAlign: "right" }}>
-                    {typeof oil.vk1 === "number" && !Number.isNaN(oil.vk1)
-                      ? `${oil.vk1.toFixed(2)} €`
-                      : "–"}
+                  <td style={{ ...styles.td, textAlign: "right", minWidth: 170 }}>
+                    <div>
+                      {typeof oil.vk1 === "number" && !Number.isNaN(oil.vk1)
+                        ? `${oil.vk1.toFixed(2)} €`
+                        : "–"}
+                    </div>
+                    <div style={{ color: "#9be89b", fontSize: "12px", marginTop: "3px" }}>
+                      {typeof oil.marginEuro === "number" && !Number.isNaN(oil.marginEuro)
+                        ? `Marge: ${oil.marginEuro.toFixed(2)} €`
+                        : "Marge: –"}
+                    </div>
+                    <div style={{ color: "#9be89b", fontSize: "12px" }}>
+                      {typeof oil.marginPercent === "number" && !Number.isNaN(oil.marginPercent)
+                        ? `${oil.marginPercent.toFixed(1)} %`
+                        : "–"}
+                      {" · "}
+                      {typeof oil.marginPerLiter === "number" && !Number.isNaN(oil.marginPerLiter)
+                        ? `${oil.marginPerLiter.toFixed(2)} €/L`
+                        : "– €/L"}
+                    </div>
                   </td>
                 </tr>
               ))}
