@@ -6,12 +6,13 @@ from datetime import datetime
 
 import pandas as pd
 
-BASE_DIR = r"C:\Users\stefa\OneDrive\Documents\Öl Export WAP"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.environ.get("OEL_EXPORT_BASE_DIR", SCRIPT_DIR)
 EXCEL_FILE = os.path.join(BASE_DIR, "Artikel.XLSX")
 OUT_DIR = os.path.join(BASE_DIR, "Bearbeitet")
 BACKUP_DIR = os.path.join(OUT_DIR, "backups")
 LOG_FILE = os.path.join(OUT_DIR, "export_log.txt")
-PROJECT_DIR = r"C:\Users\stefa\OneDrive\Documents\GitHub\Oelpreis-Manager-Pro"
+PROJECT_DIR = os.environ.get("OEL_PROJECT_DIR", os.path.dirname(SCRIPT_DIR))
 PUBLIC_JSON = os.path.join(PROJECT_DIR, "public", "data", "localdb.json")
 SRC_JSON = os.path.join(PROJECT_DIR, "src", "data", "localdb.json")
 
@@ -90,7 +91,8 @@ def export_json(df):
         bezeichnung = str(safe_get(row, "Bezeichnung")).strip()
         freigaben = str(safe_get(row, "Bemerkungen")).strip()
 
-        nettopreis = to_float(safe_get(row, "nettopreislieferant"))
+        nettopreis_raw = safe_get(row, "nettopreislieferant") or safe_get(row, "nettopreis_lieferant") or safe_get(row, "nettopreis")
+        nettopreis = to_float(nettopreis_raw)
         vk1 = to_float(safe_get(row, "vk1"))
         gebinde_l = parse_liters(bezeichnung)
         fluid_typ = detect_fluid_typ(bezeichnung)

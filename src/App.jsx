@@ -7,9 +7,18 @@ function App() {
   const [filtered, setFiltered] = useState([]);
 
   const toNumber = (value) => {
-    if (typeof value === "number") return value;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
     if (value === null || value === undefined || value === "") return 0;
-    const parsed = Number(String(value).replace(",", "."));
+    const raw = String(value).trim();
+    if (!raw) return 0;
+
+    const normalized = raw
+      .replace(/€/g, "")
+      .replace(/\s/g, "")
+      .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+      .replace(",", ".");
+
+    const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
