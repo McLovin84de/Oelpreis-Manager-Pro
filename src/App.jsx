@@ -58,6 +58,27 @@ function App() {
     return styles.badgeGreen;
   };
 
+  const parseLiters = (oil) => {
+    const direct = toNumber(oil.gebinde_l);
+    if (direct > 0) return direct;
+    const text = String(oil.bezeichnung || "").toLowerCase();
+    const packMatch = text.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*l\b/);
+    if (packMatch) {
+      const packs = toNumber(packMatch[1]);
+      const litersEach = toNumber(packMatch[2]);
+      if (packs > 0 && litersEach > 0) return packs * litersEach;
+    }
+    const singleMatch = text.match(/(\d+(?:[.,]\d+)?)\s*l\b/);
+    if (!singleMatch) return 0;
+    return toNumber(singleMatch[1]);
+  };
+
+  const getMargeProLiter = (oil) => {
+    const liters = parseLiters(oil);
+    if (!liters) return null;
+    return getRohertrag(oil) / liters;
+  };
+
   const normalizeOil = (oil) => {
     const freigaben = Array.isArray(oil.freigaben) ? oil.freigaben.join(", ") : oil.freigaben || "";
     return {
@@ -180,6 +201,7 @@ function App() {
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>
                       <span style={{ ...styles.badge, ...getMargeStyle(marge) }}>{formatPercent(marge)}</span>
+                      <div style={styles.subValue}>{formatEuro(getMargeProLiter(oil))} /L</div>
                     </td>
                   </tr>
                 );
@@ -210,6 +232,7 @@ const styles = {
   badgeRed: { backgroundColor: "#4a1515", color: "#ffb3b3", border: "1px solid #8a2b2b" },
   badgeYellow: { backgroundColor: "#4a3d12", color: "#ffe28a", border: "1px solid #8a742b" },
   badgeGreen: { backgroundColor: "#153d24", color: "#9af0b8", border: "1px solid #2f8a50" },
+  subValue: { fontSize: "12px", color: "#b8bec9", marginTop: "4px" },
 };
 
 export default App;
