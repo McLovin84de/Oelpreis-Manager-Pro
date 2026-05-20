@@ -83,12 +83,22 @@ function App() {
   }, [search, data]);
 
   // Hervorhebung
+  const escapeHtml = (value) =>
+    value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
   const highlight = (text) => {
-    const safeText = Array.isArray(text) ? text.join(", ") : String(text || "");
-    if (!safeText) return "";
+    const rawText = Array.isArray(text) ? text.join(", ") : String(text || "");
+    if (!rawText) return "";
+
+    const safeText = escapeHtml(rawText);
     if (!search) return safeText;
 
-    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedSearch = escapeHtml(search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(`(${escapedSearch})`, "gi");
 
     return safeText.replace(
