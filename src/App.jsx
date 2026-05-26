@@ -87,8 +87,26 @@ function App() {
     return `${toNumber(value).toFixed(2)} € /L`;
   };
 
+  const normalizeSearchText = (value) =>
+    String(value ?? "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
+
   const normalizeOil = (oil) => {
     const freigaben = Array.isArray(oil.freigaben) ? oil.freigaben.join(", ") : oil.freigaben || "";
+    const searchText = [
+      oil.artikelnummer,
+      oil.interne_nummer,
+      oil.hersteller_artikelnummer,
+      oil.hersteller,
+      oil.bezeichnung,
+      freigaben,
+      oil.kategorie,
+      oil.fluid_typ,
+    ].join(" ");
+
     return {
       ...oil,
       artikelnummer: oil.artikelnummer || oil.interne_nummer || "",
@@ -99,6 +117,7 @@ function App() {
       freigaben,
       kategorie: oil.kategorie || "",
       fluid_typ: oil.fluid_typ || "",
+      search_text: normalizeSearchText(searchText),
     };
   };
 
@@ -136,8 +155,23 @@ function App() {
       threshold: 0.3,
     });
 
-    if (!search.trim()) setFiltered(data.daten);
-    else setFiltered(fuse.search(search).map((r) => r.item));
+    if (!search.trim()) {
+      setFiltered(data.daten);
+      return;
+    }
+
+    const normalizedSearch = normalizeSearchText(search);
+    const directMatches = normalizedSearch
+      ? data.daten.filter((oil) => oil.search_text.includes(normalizedSearch))
+      : [];
+    const fuzzyMatches = fuse.search(search).map((r) => r.item);
+    const mergedMatches = new Map();
+
+    [...directMatches, ...fuzzyMatches].forEach((oil) => {
+      mergedMatches.set(`${oil.interne_nummer}-${oil.artikelnummer}`, oil);
+    });
+
+    setFiltered([...mergedMatches.values()]);
   }, [search, data]);
 
   const escapeHtml = (value) =>

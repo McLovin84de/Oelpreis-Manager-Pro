@@ -1,5 +1,5 @@
 {
-  "stand_datum": "2026-05-27 01:39",
+  "stand_datum": "2026-05-27 01:52",
   "daten": [
     {
       "interne_nummer": "OEL-042",
@@ -13,12 +13,12 @@
       "fluid_typ": "0W-20",
       "gebinde_l": 5.0,
       "nettopreis": 53.9,
-      "vk1": 78.9,
+      "vk1": 125.0,
       "ek_pro_liter": 10.78,
-      "preis_pro_liter": 15.78,
-      "rohertrag": 25.0,
-      "marge_prozent": 31.7,
-      "marge_pro_liter": 5.0,
+      "preis_pro_liter": 25.0,
+      "rohertrag": 71.1,
+      "marge_prozent": 56.9,
+      "marge_pro_liter": 14.22,
       "bemerkungen": "0W-20, ACEA C5, FORD (WSS-M2C956-A1), PORSCHE (C20), VW (508 00), VW (509 00), ACEA C5, VW 508.00, VW 509.00, Porsche C20, Ford WSS-M2C-956-A1",
       "status": "OK",
       "unvollstaendig": ""
