@@ -5,6 +5,7 @@ function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: "artikelnummer", direction: "asc" });
 
   const toNumber = (value) => {
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -194,6 +195,57 @@ function App() {
     return safeText.replace(regex, (m) => `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`);
   };
 
+  const sortAccessors = {
+    artikelnummer: (oil) => oil.artikelnummer || oil.interne_nummer || "",
+    hersteller_artikelnummer: (oil) => oil.hersteller_artikelnummer || "",
+    bezeichnung: (oil) => oil.bezeichnung || "",
+    freigaben: (oil) => oil.freigaben || "",
+    hersteller: (oil) => oil.hersteller || "",
+    kategorie: (oil) => oil.kategorie || "",
+    fluid_typ: (oil) => oil.fluid_typ || "",
+    ek: getEk,
+    vk: getVk,
+    rohertrag: getRohertrag,
+    marge: getMargeProzent,
+  };
+
+  const numericSortKeys = new Set(["ek", "vk", "rohertrag", "marge"]);
+  const collator = new Intl.Collator("de", { numeric: true, sensitivity: "base" });
+
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    const accessor = sortAccessors[sortConfig.key];
+    if (!accessor) return 0;
+
+    const direction = sortConfig.direction === "desc" ? -1 : 1;
+    const valueA = accessor(a);
+    const valueB = accessor(b);
+
+    if (numericSortKeys.has(sortConfig.key)) {
+      return (toNumber(valueA) - toNumber(valueB)) * direction;
+    }
+
+    return collator.compare(String(valueA), String(valueB)) * direction;
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const renderSortHeader = (key, label) => {
+    const isActive = sortConfig.key === key;
+    const indicator = isActive ? (sortConfig.direction === "asc" ? "▲" : "▼") : "↕";
+
+    return (
+      <button type="button" onClick={() => handleSort(key)} style={styles.sortButton} title={`${label} sortieren`}>
+        <span>{label}</span>
+        <span style={isActive ? styles.sortIconActive : styles.sortIcon}>{indicator}</span>
+      </button>
+    );
+  };
+
   return (
     <div style={styles.page}>
       <h1 style={styles.title}>Ölpreis-Manager Pro</h1>
@@ -215,21 +267,21 @@ function App() {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Artikelnummer</th>
-                <th style={styles.th}>Hersteller-Art.-Nr.</th>
-                <th style={styles.th}>Bezeichnung</th>
-                <th style={styles.th}>Freigaben</th>
-                <th style={styles.th}>Hersteller</th>
-                <th style={styles.th}>Kategorie</th>
-                <th style={styles.th}>Typ</th>
-                <th style={styles.th}>EK netto</th>
-                <th style={styles.th}>VK1 netto</th>
-                <th style={styles.th}>Rohertrag</th>
-                <th style={styles.th}>Marge</th>
+                <th style={styles.th}>{renderSortHeader("artikelnummer", "Artikelnummer")}</th>
+                <th style={styles.th}>{renderSortHeader("hersteller_artikelnummer", "Hersteller-Art.-Nr.")}</th>
+                <th style={styles.th}>{renderSortHeader("bezeichnung", "Bezeichnung")}</th>
+                <th style={styles.th}>{renderSortHeader("freigaben", "Freigaben")}</th>
+                <th style={styles.th}>{renderSortHeader("hersteller", "Hersteller")}</th>
+                <th style={styles.th}>{renderSortHeader("kategorie", "Kategorie")}</th>
+                <th style={styles.th}>{renderSortHeader("fluid_typ", "Typ")}</th>
+                <th style={styles.th}>{renderSortHeader("ek", "EK netto")}</th>
+                <th style={styles.th}>{renderSortHeader("vk", "VK1 netto")}</th>
+                <th style={styles.th}>{renderSortHeader("rohertrag", "Rohertrag")}</th>
+                <th style={styles.th}>{renderSortHeader("marge", "Marge")}</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((oil, i) => {
+              {sortedFiltered.map((oil, i) => {
                 const marge = getMargeProzent(oil);
                 return (
                   <tr key={i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
@@ -268,6 +320,9 @@ const styles = {
   tableContainer: { overflowX: "auto", borderRadius: "8px", border: "1px solid #333", backgroundColor: "#1c1c1c" },
   table: { width: "100%", borderCollapse: "collapse" },
   th: { textAlign: "left", backgroundColor: "#222", color: "#ffeb3b", padding: "10px", borderBottom: "2px solid #333", position: "sticky", top: 0 },
+  sortButton: { display: "inline-flex", alignItems: "center", gap: "6px", width: "100%", border: 0, padding: 0, background: "transparent", color: "inherit", font: "inherit", fontWeight: 700, textAlign: "left", cursor: "pointer" },
+  sortIcon: { color: "#777", fontSize: "11px" },
+  sortIconActive: { color: "#ffeb3b", fontSize: "11px" },
   td: { padding: "8px 10px", borderBottom: "1px solid #333", verticalAlign: "top" },
   tr: { backgroundColor: "#1a1a1a" },
   trAlt: { backgroundColor: "#181818" },
