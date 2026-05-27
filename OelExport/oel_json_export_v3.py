@@ -56,17 +56,77 @@ def parse_liters(bezeichnung):
     return 1.0
 
 
+def apply_sale_price_rules(vk1, kategorie, gebinde_l):
+    price_table = {
+        ("Longlife/Spezial", 1.0): 25.0,
+        ("Longlife/Spezial", 5.0): 125.0,
+        ("Longlife/Spezial", 6.0): 150.0,
+        ("Premium/Hochleistung", 1.0): 35.0,
+        ("Premium/Hochleistung", 5.0): 175.0,
+        ("Standard", 5.0): 87.5,
+    }
+    return price_table.get((kategorie, round(gebinde_l, 2)), vk1)
+
+
+def load_existing_internal_numbers():
+    mapping = {}
+    used_numbers = set()
+
+    for path in [PUBLIC_JSON, SRC_JSON, os.path.join(OUT_DIR, "localdb.json")]:
+        if not os.path.exists(path):
+            continue
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+        except Exception:
+            continue
+
+        rows = payload.get("daten", payload) if isinstance(payload, dict) else payload
+        if not isinstance(rows, list):
+            continue
+
+        for item in rows:
+            if not isinstance(item, dict):
+                continue
+
+            internal = str(item.get("interne_nummer", "")).strip()
+            if internal.startswith("OEL-"):
+                used_numbers.add(internal)
+
+            for key in [
+                item.get("artikelnummer", ""),
+                item.get("hersteller_artikelnummer", ""),
+                item.get("wap_artikelnummer", ""),
+            ]:
+                key = str(key).strip()
+                if key and internal:
+                    mapping.setdefault(key, internal)
+
+    return mapping, used_numbers
+
+
+def next_internal_number(used_numbers):
+    highest = 0
+    for number in used_numbers:
+        match = re.match(r"^OEL-(\d+)$", str(number))
+        if match:
+            highest = max(highest, int(match.group(1)))
+
+    while True:
+        highest += 1
+        candidate = f"OEL-{highest:03d}"
+        if candidate not in used_numbers:
+            used_numbers.add(candidate)
+            return candidate
+
+
 def detect_fluid_typ(bezeichnung):
-    text = str(bezeichnung or "").lower()
-    if "motoröl" in text or "motorol" in text:
-        return "Motoröl"
-    if "getriebe" in text or "atf" in text:
-        return "Getriebeöl"
-    if any(t in text for t in ["kühl", "kuehl", "frostschutz", "g12", "g13", "g40", "d40"]):
-        return "Kühlmittel"
-    if "bremsflüssigkeit" in text or "bremsfluessigkeit" in text or "dot" in text:
-        return "Bremsflüssigkeit"
-    return "Sonstiges"
+    text = str(bezeichnung or "")
+    match = re.search(r"\b(\d{1,2})\s*w\s*-?\s*(\d{2})\b", text, flags=re.IGNORECASE)
+    if not match:
+        return ""
+    return f"{match.group(1).upper()}W-{match.group(2)}"
 
 
 def detect_category(bezeichnung, freigaben):
@@ -84,29 +144,48 @@ def detect_category(bezeichnung, freigaben):
 
 def export_json(df):
     daten = []
+    existing_numbers, used_numbers = load_existing_internal_numbers()
+
     for _, row in df.iterrows():
-        artikelnummer = str(safe_get(row, "ArtikelNr")).strip()
+        wap_artikelnummer = str(safe_get(row, "ArtikelNrOrder") or safe_get(row, "ArtikelNr")).strip()
         hersteller_artikelnummer = str(safe_get(row, "HArtNr")).strip()
         hersteller = str(safe_get(row, "Hersteller")).strip()
         bezeichnung = str(safe_get(row, "Bezeichnung")).strip()
         freigaben = str(safe_get(row, "Bemerkungen")).strip()
 
+        if "sensor" in bezeichnung.lower():
+            continue
+
+        provided_internal = wap_artikelnummer if wap_artikelnummer.startswith("OEL-") else ""
+        artikelnummer = (
+            existing_numbers.get(hersteller_artikelnummer)
+            or existing_numbers.get(wap_artikelnummer)
+            or provided_internal
+            or next_internal_number(used_numbers)
+        )
+        if hersteller_artikelnummer:
+            existing_numbers.setdefault(hersteller_artikelnummer, artikelnummer)
+        if wap_artikelnummer:
+            existing_numbers.setdefault(wap_artikelnummer, artikelnummer)
+
         nettopreis_raw = safe_get(row, "nettopreislieferant") or safe_get(row, "nettopreis_lieferant") or safe_get(row, "nettopreis")
         nettopreis = to_float(nettopreis_raw)
-        vk1 = to_float(safe_get(row, "vk1"))
         gebinde_l = parse_liters(bezeichnung)
         fluid_typ = detect_fluid_typ(bezeichnung)
         kategorie = detect_category(bezeichnung, freigaben)
+        vk1 = apply_sale_price_rules(to_float(safe_get(row, "vk1")), kategorie, gebinde_l)
 
         rohertrag = (vk1 - nettopreis) if vk1 > 0 else 0
         marge_prozent = (((vk1 - nettopreis) / vk1) * 100) if vk1 > 0 else 0
         preis_pro_liter = (vk1 / gebinde_l) if gebinde_l > 0 else vk1
         ek_pro_liter = (nettopreis / gebinde_l) if gebinde_l > 0 else nettopreis
+        marge_pro_liter = preis_pro_liter - ek_pro_liter
 
         ds = {
             "interne_nummer": artikelnummer,
             "artikelnummer": artikelnummer,
             "hersteller_artikelnummer": hersteller_artikelnummer,
+            "wap_artikelnummer": wap_artikelnummer,
             "hersteller": hersteller,
             "bezeichnung": bezeichnung,
             "freigaben": freigaben,
@@ -119,6 +198,7 @@ def export_json(df):
             "ek_pro_liter": round(ek_pro_liter, 2),
             "rohertrag": round(rohertrag, 2),
             "marge_prozent": round(marge_prozent, 1),
+            "marge_pro_liter": round(marge_pro_liter, 2),
         }
         daten.append(ds)
 

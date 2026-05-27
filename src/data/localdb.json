@@ -1,9 +1,9 @@
 {
-  "stand_datum": "2026-05-27 01:52",
+  "stand_datum": "2026-05-27 01:59",
   "daten": [
     {
       "interne_nummer": "OEL-042",
-      "artikelnummer": "215005",
+      "artikelnummer": "OEL-042",
       "hersteller_artikelnummer": "215005",
       "wap_artikelnummer": "215005",
       "hersteller": "EUROLUB",
@@ -25,7 +25,7 @@
     },
     {
       "interne_nummer": "OEL-001",
-      "artikelnummer": "393005",
+      "artikelnummer": "OEL-001",
       "hersteller_artikelnummer": "393005",
       "wap_artikelnummer": "OEL-001",
       "hersteller": "EUROLUB",
@@ -47,7 +47,7 @@
     },
     {
       "interne_nummer": "OEL-002",
-      "artikelnummer": "211006",
+      "artikelnummer": "OEL-002",
       "hersteller_artikelnummer": "211006",
       "wap_artikelnummer": "OEL-002",
       "hersteller": "EUROLUB",
@@ -69,7 +69,7 @@
     },
     {
       "interne_nummer": "OEL-003",
-      "artikelnummer": "219001",
+      "artikelnummer": "OEL-003",
       "hersteller_artikelnummer": "219001",
       "wap_artikelnummer": "OEL-003",
       "hersteller": "EUROLUB",
@@ -91,7 +91,7 @@
     },
     {
       "interne_nummer": "OEL-004",
-      "artikelnummer": "219005",
+      "artikelnummer": "OEL-004",
       "hersteller_artikelnummer": "219005",
       "wap_artikelnummer": "OEL-004",
       "hersteller": "EUROLUB",
@@ -113,7 +113,7 @@
     },
     {
       "interne_nummer": "OEL-005",
-      "artikelnummer": "226001",
+      "artikelnummer": "OEL-005",
       "hersteller_artikelnummer": "226001",
       "wap_artikelnummer": "OEL-005",
       "hersteller": "EUROLUB",
@@ -135,7 +135,7 @@
     },
     {
       "interne_nummer": "OEL-006",
-      "artikelnummer": "226005",
+      "artikelnummer": "OEL-006",
       "hersteller_artikelnummer": "226005",
       "wap_artikelnummer": "OEL-006",
       "hersteller": "EUROLUB",
@@ -157,7 +157,7 @@
     },
     {
       "interne_nummer": "OEL-007",
-      "artikelnummer": "252001",
+      "artikelnummer": "OEL-007",
       "hersteller_artikelnummer": "252001",
       "wap_artikelnummer": "OEL-007",
       "hersteller": "EUROLUB",
@@ -179,7 +179,7 @@
     },
     {
       "interne_nummer": "OEL-008",
-      "artikelnummer": "254001",
+      "artikelnummer": "OEL-008",
       "hersteller_artikelnummer": "254001",
       "wap_artikelnummer": "OEL-008",
       "hersteller": "EUROLUB",
@@ -201,7 +201,7 @@
     },
     {
       "interne_nummer": "OEL-009",
-      "artikelnummer": "254005",
+      "artikelnummer": "OEL-009",
       "hersteller_artikelnummer": "254005",
       "wap_artikelnummer": "OEL-009",
       "hersteller": "EUROLUB",
@@ -223,7 +223,7 @@
     },
     {
       "interne_nummer": "OEL-010",
-      "artikelnummer": "255005",
+      "artikelnummer": "OEL-010",
       "hersteller_artikelnummer": "255005",
       "wap_artikelnummer": "OEL-010",
       "hersteller": "EUROLUB",
@@ -245,7 +245,7 @@
     },
     {
       "interne_nummer": "OEL-011",
-      "artikelnummer": "314001",
+      "artikelnummer": "OEL-011",
       "hersteller_artikelnummer": "314001",
       "wap_artikelnummer": "OEL-011",
       "hersteller": "EUROLUB",
@@ -267,7 +267,7 @@
     },
     {
       "interne_nummer": "OEL-012",
-      "artikelnummer": "314005",
+      "artikelnummer": "OEL-012",
       "hersteller_artikelnummer": "314005",
       "wap_artikelnummer": "OEL-012",
       "hersteller": "EUROLUB",
@@ -289,7 +289,7 @@
     },
     {
       "interne_nummer": "OEL-013",
-      "artikelnummer": "316020",
+      "artikelnummer": "OEL-013",
       "hersteller_artikelnummer": "316020",
       "wap_artikelnummer": "OEL-013",
       "hersteller": "EUROLUB",
@@ -311,7 +311,7 @@
     },
     {
       "interne_nummer": "OEL-014",
-      "artikelnummer": "319001",
+      "artikelnummer": "OEL-014",
       "hersteller_artikelnummer": "319001",
       "wap_artikelnummer": "OEL-014",
       "hersteller": "EUROLUB",
@@ -333,7 +333,7 @@
     },
     {
       "interne_nummer": "OEL-015",
-      "artikelnummer": "319005",
+      "artikelnummer": "OEL-015",
       "hersteller_artikelnummer": "319005",
       "wap_artikelnummer": "OEL-015",
       "hersteller": "EUROLUB",
@@ -355,7 +355,7 @@
     },
     {
       "interne_nummer": "OEL-016",
-      "artikelnummer": "340005",
+      "artikelnummer": "OEL-016",
       "hersteller_artikelnummer": "340005",
       "wap_artikelnummer": "OEL-016",
       "hersteller": "EUROLUB",
@@ -377,7 +377,7 @@
     },
     {
       "interne_nummer": "OEL-017",
-      "artikelnummer": "FF6719-DR",
+      "artikelnummer": "OEL-017",
       "hersteller_artikelnummer": "FF6719-DR",
       "wap_artikelnummer": "OEL-017",
       "hersteller": "Fanfaro",
@@ -399,7 +399,7 @@
     },
     {
       "interne_nummer": "OEL-018",
-      "artikelnummer": "20060-0050-99",
+      "artikelnummer": "OEL-018",
       "hersteller_artikelnummer": "20060-0050-99",
       "wap_artikelnummer": "OEL-018",
       "hersteller": "ROWE",
@@ -421,7 +421,7 @@
     },
     {
       "interne_nummer": "OEL-019",
-      "artikelnummer": "20118-0050-99",
+      "artikelnummer": "OEL-019",
       "hersteller_artikelnummer": "20118-0050-99",
       "wap_artikelnummer": "OEL-019",
       "hersteller": "ROWE",
@@ -443,7 +443,7 @@
     },
     {
       "interne_nummer": "OEL-020",
-      "artikelnummer": "20118-0010-99",
+      "artikelnummer": "OEL-020",
       "hersteller_artikelnummer": "20118-0010-99",
       "wap_artikelnummer": "OEL-020",
       "hersteller": "ROWE",
@@ -465,7 +465,7 @@
     },
     {
       "interne_nummer": "OEL-021",
-      "artikelnummer": "20146-0050-99",
+      "artikelnummer": "OEL-021",
       "hersteller_artikelnummer": "20146-0050-99",
       "wap_artikelnummer": "OEL-021",
       "hersteller": "ROWE",
@@ -487,7 +487,7 @@
     },
     {
       "interne_nummer": "OEL-022",
-      "artikelnummer": "20146-0010-99",
+      "artikelnummer": "OEL-022",
       "hersteller_artikelnummer": "20146-0010-99",
       "wap_artikelnummer": "OEL-022",
       "hersteller": "ROWE",
@@ -509,7 +509,7 @@
     },
     {
       "interne_nummer": "OEL-023",
-      "artikelnummer": "20036-0200-99",
+      "artikelnummer": "OEL-023",
       "hersteller_artikelnummer": "20036-0200-99",
       "wap_artikelnummer": "OEL-023",
       "hersteller": "ROWE",
@@ -531,7 +531,7 @@
     },
     {
       "interne_nummer": "OEL-024",
-      "artikelnummer": "FF6726-5",
+      "artikelnummer": "OEL-024",
       "hersteller_artikelnummer": "FF6726-5",
       "wap_artikelnummer": "OEL-024",
       "hersteller": "Fanfaro",
@@ -553,7 +553,7 @@
     },
     {
       "interne_nummer": "OEL-025",
-      "artikelnummer": "20371-0010-99",
+      "artikelnummer": "OEL-025",
       "hersteller_artikelnummer": "20371-0010-99",
       "wap_artikelnummer": "OEL-025",
       "hersteller": "ROWE",
@@ -575,7 +575,7 @@
     },
     {
       "interne_nummer": "OEL-026",
-      "artikelnummer": "550041874",
+      "artikelnummer": "OEL-026",
       "hersteller_artikelnummer": "550041874",
       "wap_artikelnummer": "OEL-026",
       "hersteller": "SHELL",
@@ -597,7 +597,7 @@
     },
     {
       "interne_nummer": "OEL-027",
-      "artikelnummer": "550042351",
+      "artikelnummer": "OEL-027",
       "hersteller_artikelnummer": "550042351",
       "wap_artikelnummer": "OEL-027",
       "hersteller": "SHELL",
@@ -619,7 +619,7 @@
     },
     {
       "interne_nummer": "OEL-028",
-      "artikelnummer": "550042371",
+      "artikelnummer": "OEL-028",
       "hersteller_artikelnummer": "550042371",
       "wap_artikelnummer": "OEL-028",
       "hersteller": "SHELL",
@@ -641,7 +641,7 @@
     },
     {
       "interne_nummer": "OEL-029",
-      "artikelnummer": "20372-0050-99",
+      "artikelnummer": "OEL-029",
       "hersteller_artikelnummer": "20372-0050-99",
       "wap_artikelnummer": "OEL-028",
       "hersteller": "ROWE",
@@ -663,7 +663,7 @@
     },
     {
       "interne_nummer": "OEL-030",
-      "artikelnummer": "550048040",
+      "artikelnummer": "OEL-030",
       "hersteller_artikelnummer": "550048040",
       "wap_artikelnummer": "OEL-029",
       "hersteller": "SHELL",
@@ -685,7 +685,7 @@
     },
     {
       "interne_nummer": "OEL-031",
-      "artikelnummer": "550065928",
+      "artikelnummer": "OEL-031",
       "hersteller_artikelnummer": "550065928",
       "wap_artikelnummer": "OEL-030",
       "hersteller": "SHELL",
@@ -707,7 +707,7 @@
     },
     {
       "interne_nummer": "OEL-032",
-      "artikelnummer": "550053643",
+      "artikelnummer": "OEL-032",
       "hersteller_artikelnummer": "550053643",
       "wap_artikelnummer": "OEL-031",
       "hersteller": "SHELL",
@@ -729,7 +729,7 @@
     },
     {
       "interne_nummer": "OEL-033",
-      "artikelnummer": "109671",
+      "artikelnummer": "OEL-033",
       "hersteller_artikelnummer": "109671",
       "wap_artikelnummer": "OEL-032",
       "hersteller": "MOTUL",
@@ -751,7 +751,7 @@
     },
     {
       "interne_nummer": "OEL-034",
-      "artikelnummer": "243208",
+      "artikelnummer": "OEL-034",
       "hersteller_artikelnummer": "243208",
       "wap_artikelnummer": "OEL-033",
       "hersteller": "EUROLUB",
@@ -773,7 +773,7 @@
     },
     {
       "interne_nummer": "OEL-035",
-      "artikelnummer": "00101610",
+      "artikelnummer": "OEL-035",
       "hersteller_artikelnummer": "00101610",
       "wap_artikelnummer": "OEL-035",
       "hersteller": "Eni",
@@ -795,7 +795,7 @@
     },
     {
       "interne_nummer": "OEL-036",
-      "artikelnummer": "00102310",
+      "artikelnummer": "OEL-036",
       "hersteller_artikelnummer": "00102310",
       "wap_artikelnummer": "OEL-036",
       "hersteller": "Eni",
@@ -817,7 +817,7 @@
     },
     {
       "interne_nummer": "OEL-037",
-      "artikelnummer": "08232-P99L2LHE",
+      "artikelnummer": "OEL-037",
       "hersteller_artikelnummer": "08232-P99L2LHE",
       "wap_artikelnummer": "OEL-037",
       "hersteller": "Honda",
@@ -839,7 +839,7 @@
     },
     {
       "interne_nummer": "OEL-038",
-      "artikelnummer": "214005",
+      "artikelnummer": "OEL-038",
       "hersteller_artikelnummer": "214005",
       "wap_artikelnummer": "OEL-038",
       "hersteller": "EUROLUB",
@@ -861,7 +861,7 @@
     },
     {
       "interne_nummer": "OEL-039",
-      "artikelnummer": "393001",
+      "artikelnummer": "OEL-039",
       "hersteller_artikelnummer": "393001",
       "wap_artikelnummer": "OEL-039",
       "hersteller": "EUROLUB",
@@ -883,7 +883,7 @@
     },
     {
       "interne_nummer": "OEL-040",
-      "artikelnummer": "212001",
+      "artikelnummer": "OEL-040",
       "hersteller_artikelnummer": "212001",
       "wap_artikelnummer": "OEL-040",
       "hersteller": "EUROLUB",
@@ -905,7 +905,7 @@
     },
     {
       "interne_nummer": "OEL-041",
-      "artikelnummer": "212005",
+      "artikelnummer": "OEL-041",
       "hersteller_artikelnummer": "212005",
       "wap_artikelnummer": "OEL-041",
       "hersteller": "EUROLUB",
