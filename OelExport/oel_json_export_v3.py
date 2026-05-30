@@ -122,8 +122,31 @@ def next_internal_number(used_numbers):
 
 
 def detect_fluid_typ(bezeichnung):
-    text = str(bezeichnung or "")
-    match = re.search(r"\b(\d{1,2})\s*w\s*-?\s*(\d{2})\b", text, flags=re.IGNORECASE)
+    text = str(bezeichnung or "").lower()
+    if "motoröl" in text or "motorol" in text:
+        return "Motoröl"
+    if "getriebeöl" in text or "getriebeoel" in text or "getriebe" in text or "atf" in text:
+        return "Getriebeöl"
+    if (
+        "kühlmittel" in text
+        or "kuehlmittel" in text
+        or "kühlerfrostschutz" in text
+        or "kuehlerfrostschutz" in text
+        or "frostschutz" in text
+        or "g12" in text
+        or "g13" in text
+        or "g40" in text
+        or "d40" in text
+    ):
+        return "Kühlmittel"
+    if "bremsflüssigkeit" in text or "bremsfluessigkeit" in text or "dot" in text:
+        return "Bremsflüssigkeit"
+    return "Sonstiges"
+
+
+def detect_viskositaet(*values):
+    text = " ".join(str(value or "") for value in values)
+    match = re.search(r"\b(\d{1,3})\s*w\s*-?\s*(\d{2,3})\b", text, flags=re.IGNORECASE)
     if not match:
         return ""
     return f"{match.group(1).upper()}W-{match.group(2)}"
@@ -172,6 +195,7 @@ def export_json(df):
         nettopreis = to_float(nettopreis_raw)
         gebinde_l = parse_liters(bezeichnung)
         fluid_typ = detect_fluid_typ(bezeichnung)
+        viskositaet = detect_viskositaet(bezeichnung, freigaben)
         kategorie = detect_category(bezeichnung, freigaben)
         vk1 = apply_sale_price_rules(to_float(safe_get(row, "vk1")), kategorie, gebinde_l)
 
@@ -189,8 +213,10 @@ def export_json(df):
             "hersteller": hersteller,
             "bezeichnung": bezeichnung,
             "freigaben": freigaben,
+            "bemerkungen": freigaben,
             "kategorie": kategorie,
             "fluid_typ": fluid_typ,
+            "viskositaet": viskositaet,
             "gebinde_l": round(gebinde_l, 2),
             "nettopreis": round(nettopreis, 2),
             "vk1": round(vk1, 2),

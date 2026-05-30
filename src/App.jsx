@@ -42,14 +42,18 @@ function App() {
 
   const getRohertrag = (oil) => {
     if (oil.rohertrag !== undefined && oil.rohertrag !== null && oil.rohertrag !== "") return toNumber(oil.rohertrag);
-    return getVk(oil) - getEk(oil);
+    const vk = getVk(oil);
+    const ek = getEk(oil);
+    if (!vk || !ek) return null;
+    return vk - ek;
   };
 
   const getMargeProzent = (oil) => {
     if (oil.marge_prozent !== undefined && oil.marge_prozent !== null && oil.marge_prozent !== "") return toNumber(oil.marge_prozent);
     const vk = getVk(oil);
-    if (!vk) return 0;
-    return ((vk - getEk(oil)) / vk) * 100;
+    const ek = getEk(oil);
+    if (!vk || !ek) return null;
+    return ((vk - ek) / vk) * 100;
   };
 
   const getMargeStyle = (percent) => {
@@ -75,9 +79,15 @@ function App() {
   };
 
   const getMargeProLiter = (oil) => {
-    if (oil.ek_pro_liter !== undefined && oil.preis_pro_liter !== undefined) {
+    const hasEkPerLiter = hasValue(oil.ek_pro_liter);
+    const hasVkPerLiter = hasValue(oil.preis_pro_liter);
+
+    if (hasEkPerLiter && hasVkPerLiter) {
       return toNumber(oil.preis_pro_liter) - toNumber(oil.ek_pro_liter);
     }
+
+    if (hasEkPerLiter !== hasVkPerLiter) return null;
+
     const liters = parseLiters(oil);
     if (!liters) return null;
     return getRohertrag(oil) / liters;
@@ -95,8 +105,55 @@ function App() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "");
 
+  const normalizeViskositaet = (value) => {
+    const match = String(value || "").match(/\b(\d{1,3})\s*w\s*-?\s*(\d{2,3})\b/i);
+    if (!match) return "";
+    return `${match[1].toUpperCase()}W-${match[2]}`;
+  };
+
+  const detectViskositaet = (oil) => {
+    const direct = normalizeViskositaet(oil.viskositaet);
+    if (direct) return direct;
+
+    const fromFluidTyp = normalizeViskositaet(oil.fluid_typ);
+    if (fromFluidTyp) return fromFluidTyp;
+
+    return normalizeViskositaet([oil.bezeichnung, oil.freigaben, oil.bemerkungen].join(" "));
+  };
+
+  const detectFluidTyp = (oil) => {
+    const existing = String(oil.fluid_typ || "").trim();
+    const isViscosity = Boolean(normalizeViskositaet(existing));
+    if (existing && !isViscosity) return existing;
+
+    const text = String(oil.bezeichnung || "").toLowerCase();
+    if (text.includes("motoröl") || text.includes("motorol")) return "Motoröl";
+    if (text.includes("getriebeöl") || text.includes("getriebeoel") || text.includes("getriebe") || text.includes("atf")) {
+      return "Getriebeöl";
+    }
+    if (
+      text.includes("kühlmittel") ||
+      text.includes("kuehlmittel") ||
+      text.includes("kühlerfrostschutz") ||
+      text.includes("kuehlerfrostschutz") ||
+      text.includes("frostschutz") ||
+      text.includes("g12") ||
+      text.includes("g13") ||
+      text.includes("g40") ||
+      text.includes("d40")
+    ) {
+      return "Kühlmittel";
+    }
+    if (text.includes("bremsflüssigkeit") || text.includes("bremsfluessigkeit") || text.includes("dot")) {
+      return "Bremsflüssigkeit";
+    }
+    return "Sonstiges";
+  };
+
   const normalizeOil = (oil) => {
     const freigaben = Array.isArray(oil.freigaben) ? oil.freigaben.join(", ") : oil.freigaben || "";
+    const fluidTyp = detectFluidTyp(oil);
+    const viskositaet = detectViskositaet({ ...oil, freigaben });
     const searchText = [
       oil.artikelnummer,
       oil.interne_nummer,
@@ -105,7 +162,8 @@ function App() {
       oil.bezeichnung,
       freigaben,
       oil.kategorie,
-      oil.fluid_typ,
+      fluidTyp,
+      viskositaet,
     ].join(" ");
 
     return {
@@ -117,7 +175,8 @@ function App() {
       bezeichnung: oil.bezeichnung || "",
       freigaben,
       kategorie: oil.kategorie || "",
-      fluid_typ: oil.fluid_typ || "",
+      fluid_typ: fluidTyp,
+      viskositaet,
       search_text: normalizeSearchText(searchText),
     };
   };
@@ -152,6 +211,7 @@ function App() {
         "hersteller_artikelnummer",
         "kategorie",
         "fluid_typ",
+        "viskositaet",
       ],
       threshold: 0.3,
     });
@@ -203,6 +263,7 @@ function App() {
     hersteller: (oil) => oil.hersteller || "",
     kategorie: (oil) => oil.kategorie || "",
     fluid_typ: (oil) => oil.fluid_typ || "",
+    viskositaet: (oil) => oil.viskositaet || "",
     ek: getEk,
     vk: getVk,
     rohertrag: getRohertrag,
@@ -274,6 +335,7 @@ function App() {
                 <th style={styles.th}>{renderSortHeader("hersteller", "Hersteller")}</th>
                 <th style={styles.th}>{renderSortHeader("kategorie", "Kategorie")}</th>
                 <th style={styles.th}>{renderSortHeader("fluid_typ", "Typ")}</th>
+                <th style={styles.th}>{renderSortHeader("viskositaet", "Viskosität")}</th>
                 <th style={styles.th}>{renderSortHeader("ek", "EK netto")}</th>
                 <th style={styles.th}>{renderSortHeader("vk", "VK1 netto")}</th>
                 <th style={styles.th}>{renderSortHeader("rohertrag", "Rohertrag")}</th>
@@ -292,6 +354,7 @@ function App() {
                     <td style={styles.td}>{oil.hersteller || "–"}</td>
                     <td style={styles.td}>{oil.kategorie || "–"}</td>
                     <td style={styles.td}>{oil.fluid_typ || "–"}</td>
+                    <td style={styles.td}>{oil.viskositaet || "–"}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getEk(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getVk(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
