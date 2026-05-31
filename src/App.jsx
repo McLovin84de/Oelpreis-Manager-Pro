@@ -276,6 +276,30 @@ function App() {
 
   const getFreigabenKey = (oil) => oil.artikelnummer || oil.interne_nummer || "";
 
+  const getDisplayFreigaben = (freigaben) => {
+    const parts = String(freigaben || "")
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    const seen = new Set();
+    const uniqueParts = parts.filter((part) => {
+      const key = part
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[().]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return uniqueParts.join(", ");
+  };
+
   const getFreigabenPreview = (freigaben) => {
     const text = String(freigaben || "").trim();
     if (!text) return { text: "", isTruncated: false };
@@ -289,7 +313,7 @@ function App() {
   };
 
   const renderFreigaben = (oil) => {
-    const text = String(oil.freigaben || "").trim();
+    const text = getDisplayFreigaben(oil.freigaben);
     if (!text) return "–";
 
     const key = getFreigabenKey(oil);
