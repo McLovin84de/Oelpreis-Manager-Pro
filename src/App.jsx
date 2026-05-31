@@ -6,6 +6,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "artikelnummer", direction: "asc" });
+  const [expandedFreigaben, setExpandedFreigaben] = useState({});
 
   const toNumber = (value) => {
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -243,6 +244,8 @@ function App() {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
 
+  const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
   const highlight = (text) => {
     const rawText = Array.isArray(text) ? text.join(", ") : String(text || "");
     if (!rawText) return "";
@@ -250,9 +253,64 @@ function App() {
     const safeText = escapeHtml(rawText);
     if (!search) return safeText;
 
-    const escapedSearch = escapeHtml(search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedSearch = escapeRegExp(escapeHtml(search));
     const regex = new RegExp(`(${escapedSearch})`, "gi");
     return safeText.replace(regex, (m) => `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`);
+  };
+
+  const getDisplayBezeichnung = (oil) => {
+    const bezeichnung = String(oil.bezeichnung || "");
+    const viskositaet = normalizeViskositaet(oil.viskositaet);
+    const match = viskositaet.match(/^(\d{1,3})W-(\d{2,3})$/i);
+
+    if (!bezeichnung || !match) return bezeichnung;
+
+    const pattern = `${match[1]}\\s*W\\s*-?\\s*${match[2]}`;
+    return bezeichnung
+      .replace(new RegExp(`(^|[^A-Za-z0-9])${pattern}(?=$|[^A-Za-z0-9])`, "i"), "$1")
+      .replace(/\s+([,;:])/g, "$1")
+      .replace(/([([{])\s*([)\]}])/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  };
+
+  const getFreigabenKey = (oil) => oil.artikelnummer || oil.interne_nummer || "";
+
+  const getFreigabenPreview = (freigaben) => {
+    const text = String(freigaben || "").trim();
+    if (!text) return { text: "", isTruncated: false };
+
+    if (text.length > 140) {
+      const previewByLength = text.slice(0, 140).replace(/\s+\S*$/, "").replace(/[,\s]+$/, "");
+      return { text: `${previewByLength || text.slice(0, 140).trim()}...`, isTruncated: true };
+    }
+
+    return { text, isTruncated: false };
+  };
+
+  const renderFreigaben = (oil) => {
+    const text = String(oil.freigaben || "").trim();
+    if (!text) return "–";
+
+    const key = getFreigabenKey(oil);
+    const isExpanded = Boolean(expandedFreigaben[key]);
+    const preview = getFreigabenPreview(text);
+    const displayText = isExpanded || !preview.isTruncated ? text : preview.text;
+
+    return (
+      <>
+        <span dangerouslySetInnerHTML={{ __html: highlight(displayText) }} />
+        {preview.isTruncated ? (
+          <button
+            type="button"
+            style={styles.freigabenToggle}
+            onClick={() => setExpandedFreigaben((current) => ({ ...current, [key]: !isExpanded }))}
+          >
+            {isExpanded ? "weniger" : "mehr"}
+          </button>
+        ) : null}
+      </>
+    );
   };
 
   const sortAccessors = {
@@ -349,8 +407,8 @@ function App() {
                   <tr key={i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
                     <td style={styles.td}>{oil.artikelnummer || oil.interne_nummer || "–"}</td>
                     <td style={styles.td}>{oil.hersteller_artikelnummer || "–"}</td>
-                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.bezeichnung || "") }} />
-                    <td style={{ ...styles.td, maxWidth: 320, whiteSpace: "normal" }} dangerouslySetInnerHTML={{ __html: highlight(oil.freigaben || "") }} />
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(getDisplayBezeichnung(oil)) }} />
+                    <td style={styles.freigabenTd}>{renderFreigaben(oil)}</td>
                     <td style={styles.td}>{oil.hersteller || "–"}</td>
                     <td style={styles.td}>{oil.kategorie || "–"}</td>
                     <td style={styles.td}>{oil.fluid_typ || "–"}</td>
@@ -387,6 +445,8 @@ const styles = {
   sortIcon: { color: "#777", fontSize: "11px" },
   sortIconActive: { color: "#ffeb3b", fontSize: "11px" },
   td: { padding: "8px 10px", borderBottom: "1px solid #333", verticalAlign: "top" },
+  freigabenTd: { padding: "8px 10px", borderBottom: "1px solid #333", verticalAlign: "top", maxWidth: 320, whiteSpace: "normal" },
+  freigabenToggle: { display: "inline-block", marginLeft: "8px", border: "1px solid #555", borderRadius: "4px", padding: "2px 7px", backgroundColor: "#242424", color: "#ffeb3b", cursor: "pointer", font: "inherit", fontSize: "12px" },
   tr: { backgroundColor: "#1a1a1a" },
   trAlt: { backgroundColor: "#181818" },
   noData: { marginTop: "20px", fontStyle: "italic", color: "#aaa" },
