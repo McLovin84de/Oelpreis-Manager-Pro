@@ -138,6 +138,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Lokale Codex-Umgebung
+.codex/
+
 # ==========================================================
 # Öl-Export Tool – lokale Arbeits- und Backup-Dateien
 # ==========================================================
