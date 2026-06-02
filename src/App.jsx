@@ -38,6 +38,12 @@ function App() {
     return `${n.toFixed(2)} €`;
   };
 
+  const renderRequiredEuro = (value) => {
+    const n = toNumber(value);
+    if (n <= 0) return <span style={styles.inlineWarning}>fehlt</span>;
+    return formatEuro(n);
+  };
+
   const formatPercent = (value) => {
     if (!hasValue(value)) return "–";
     const n = toNumber(value);
@@ -64,8 +70,8 @@ function App() {
   };
 
   const hasMissingPrice = (oil) => getEk(oil) <= 0 || getVk(oil) <= 0;
-  const needsViskositaet = (oil) => ["Motoröl", "Getriebeöl"].includes(oil.fluid_typ);
-  const hasOpenViskositaet = (oil) => needsViskositaet(oil) && !hasValue(oil.viskositaet);
+  const needsSpezifikation = (oil) => oil.fluid_typ && oil.fluid_typ !== "Sonstiges";
+  const hasOpenSpezifikation = (oil) => needsSpezifikation(oil) && !hasValue(oil.display_spezifikation);
   const hasMissingFreigaben = (oil) => !hasValue(oil.freigaben);
 
   const getMargeStyle = (percent) => {
@@ -140,7 +146,7 @@ function App() {
     if (existing && !isViscosity) return existing;
 
     const text = normalizeSearchText([oil.bezeichnung, oil.freigaben, oil.bemerkungen].join(" "));
-    if (text.includes("bremsflussigkeit") || /\bdot[345]\b/.test(text) || text.includes("dot51")) {
+    if (text.includes("bremsflussigkeit") || /dot(?:3|4|5|51)/.test(text)) {
       return "Bremsflüssigkeit";
     }
     if (
@@ -163,19 +169,41 @@ function App() {
       text.includes("atf") ||
       text.includes("gl4") ||
       text.includes("gl5") ||
-      /\b75w\d{2,3}\b/.test(text) ||
-      /\b80w\d{2,3}\b/.test(text)
+      /(?:75|80)w\d{2,3}/.test(text)
     ) {
       return "Getriebeöl";
     }
-    if (text.includes("motorol") || text.includes("motoroel") || /\b[015]w\d{2}\b/.test(text) || /\b10w\d{2}\b/.test(text)) return "Motoröl";
+    if (text.includes("motorol") || text.includes("motoroel") || /(?:0|5|10|15)w\d{2}/.test(text)) return "Motoröl";
     return "Sonstiges";
+  };
+
+  const detectSpezifikation = (oil) => {
+    const text = [oil.viskositaet, oil.bezeichnung, oil.freigaben, oil.bemerkungen].join(" ");
+    const viskositaet = normalizeViskositaet(oil.viskositaet) || normalizeViskositaet(text);
+    if (viskositaet) return viskositaet;
+
+    const compactText = normalizeSearchText(text);
+    if (compactText.includes("dot51")) return "DOT 5.1";
+    if (compactText.includes("dot5")) return "DOT 5";
+    if (compactText.includes("dot4")) return "DOT 4";
+    if (compactText.includes("dot3")) return "DOT 3";
+
+    const coolantMatch = text.match(/(?:^|[^a-z0-9])g\s*(12|13|40)\s*(\+\+|\+)?(?=$|[^a-z0-9])/i);
+    if (coolantMatch) return `G${coolantMatch[1]}${coolantMatch[2] || ""}`;
+    if (/(?:^|[^a-z0-9])d\s*40(?=$|[^a-z0-9])/i.test(text)) return "D40";
+
+    const gearMatch = text.match(/(?:^|[^a-z0-9])gl\s*-?\s*([45])(?=$|[^a-z0-9])/i);
+    if (gearMatch) return `GL-${gearMatch[1]}`;
+    if (compactText.includes("atf")) return "ATF";
+
+    return "";
   };
 
   const normalizeOil = (oil) => {
     const freigaben = Array.isArray(oil.freigaben) ? oil.freigaben.join(", ") : oil.freigaben || "";
     const fluidTyp = detectFluidTyp(oil);
     const viskositaet = detectViskositaet({ ...oil, freigaben });
+    const displaySpezifikation = detectSpezifikation({ ...oil, freigaben, fluid_typ: fluidTyp, viskositaet });
     const searchText = [
       oil.artikelnummer,
       oil.interne_nummer,
@@ -186,6 +214,7 @@ function App() {
       oil.kategorie,
       fluidTyp,
       viskositaet,
+      displaySpezifikation,
     ].join(" ");
 
     return {
@@ -199,6 +228,7 @@ function App() {
       kategorie: oil.kategorie || "",
       fluid_typ: fluidTyp,
       viskositaet,
+      display_spezifikation: displaySpezifikation,
       search_text: normalizeSearchText(searchText),
     };
   };
@@ -241,6 +271,7 @@ function App() {
         "kategorie",
         "fluid_typ",
         "viskositaet",
+        "display_spezifikation",
       ],
       threshold: 0.3,
     });
@@ -266,8 +297,9 @@ function App() {
       if (filters.fluidTyp !== "alle" && oil.fluid_typ !== filters.fluidTyp) return false;
       if (filters.kategorie !== "alle" && oil.kategorie !== filters.kategorie) return false;
       if (filters.issue === "preisFehlt" && !hasMissingPrice(oil)) return false;
-      if (filters.issue === "viskositaetOffen" && !hasOpenViskositaet(oil)) return false;
+      if (filters.issue === "spezifikationOffen" && !hasOpenSpezifikation(oil)) return false;
       if (filters.issue === "freigabenFehlen" && !hasMissingFreigaben(oil)) return false;
+      if (filters.issue === "typPruefen" && oil.fluid_typ !== "Sonstiges") return false;
 
       const marge = getMargeProzent(oil);
       const hasMarge = hasValue(marge);
@@ -431,6 +463,7 @@ function App() {
     kategorie: (oil) => oil.kategorie || "",
     fluid_typ: (oil) => oil.fluid_typ || "",
     viskositaet: (oil) => oil.viskositaet || "",
+    spezifikation: (oil) => oil.display_spezifikation || oil.viskositaet || "",
     ek: getEk,
     vk: getVk,
     rohertrag: getRohertrag,
@@ -469,13 +502,14 @@ function App() {
     (acc, oil) => {
       const marge = getMargeProzent(oil);
       if (hasMissingPrice(oil)) acc.missingPrices += 1;
-      if (hasOpenViskositaet(oil)) acc.openViskositaet += 1;
+      if (hasOpenSpezifikation(oil)) acc.openSpezifikation += 1;
       if (hasMissingFreigaben(oil)) acc.missingFreigaben += 1;
+      if (oil.fluid_typ === "Sonstiges") acc.unclearType += 1;
       if (hasValue(marge) && toNumber(marge) < 45) acc.lowMargin += 1;
       if (!hasValue(marge)) acc.missingMargin += 1;
       return acc;
     },
-    { lowMargin: 0, missingPrices: 0, missingMargin: 0, openViskositaet: 0, missingFreigaben: 0 }
+    { lowMargin: 0, missingPrices: 0, missingMargin: 0, openSpezifikation: 0, missingFreigaben: 0, unclearType: 0 }
   );
 
   const fluidTypeCounts = fluidTypeOrder
@@ -576,12 +610,12 @@ function App() {
           title: "Artikel ohne berechenbare Marge anzeigen",
         })}
         {renderStatCard({
-          label: "Viskosität offen",
-          value: stats.openViskositaet,
-          isWarning: stats.openViskositaet > 0,
-          isActive: filters.issue === "viskositaetOffen",
-          onClick: () => applyStatFilter({ issue: "viskositaetOffen" }),
-          title: "Öl-Artikel ohne Viskosität anzeigen",
+          label: "Spezifikation offen",
+          value: stats.openSpezifikation,
+          isWarning: stats.openSpezifikation > 0,
+          isActive: filters.issue === "spezifikationOffen",
+          onClick: () => applyStatFilter({ issue: "spezifikationOffen" }),
+          title: "Artikel ohne Viskosität oder Spezifikation anzeigen",
         })}
         {renderStatCard({
           label: "Freigaben fehlen",
@@ -591,6 +625,16 @@ function App() {
           onClick: () => applyStatFilter({ issue: "freigabenFehlen" }),
           title: "Artikel ohne Freigaben anzeigen",
         })}
+        {stats.unclearType > 0
+          ? renderStatCard({
+              label: "Typ prüfen",
+              value: stats.unclearType,
+              isWarning: true,
+              isActive: filters.issue === "typPruefen",
+              onClick: () => applyStatFilter({ issue: "typPruefen" }),
+              title: "Artikel mit unklarem Typ anzeigen",
+            })
+          : null}
       </div>
 
       {fluidTypeCounts.length > 0 ? (
@@ -683,7 +727,7 @@ function App() {
                 <th style={styles.th}>{renderSortHeader("hersteller", "Hersteller")}</th>
                 <th style={styles.th}>{renderSortHeader("kategorie", "Kategorie")}</th>
                 <th style={styles.th}>{renderSortHeader("fluid_typ", "Typ")}</th>
-                <th style={styles.th}>{renderSortHeader("viskositaet", "Viskosität")}</th>
+                <th style={styles.th}>{renderSortHeader("spezifikation", "Viskosität/Spez.")}</th>
                 <th style={styles.th}>{renderSortHeader("ek", "EK netto")}</th>
                 <th style={styles.th}>{renderSortHeader("vk", "VK1 netto")}</th>
                 <th style={styles.th}>{renderSortHeader("rohertrag", "Rohertrag")}</th>
@@ -702,9 +746,9 @@ function App() {
                     <td style={styles.td}>{oil.hersteller || "–"}</td>
                     <td style={styles.td}>{oil.kategorie || "–"}</td>
                     <td style={styles.td}>{oil.fluid_typ || "–"}</td>
-                    <td style={styles.td}>{oil.viskositaet || "–"}</td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getEk(oil))}</td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getVk(oil))}</td>
+                    <td style={styles.td}>{oil.display_spezifikation || "–"}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(getEk(oil))}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(getVk(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>
                       <span style={{ ...styles.badge, ...getMargeStyle(marge) }}>{formatPercent(marge)}</span>
@@ -823,6 +867,7 @@ const styles = {
   trAlt: { backgroundColor: "#181818" },
   noData: { marginTop: "20px", fontStyle: "italic", color: "#aaa" },
   errorBox: { backgroundColor: "#4a1515", border: "1px solid #8a2b2b", color: "#ffb3b3", borderRadius: "8px", padding: "12px 14px" },
+  inlineWarning: { color: "#ffe28a", fontWeight: 700 },
   badge: { display: "inline-block", minWidth: "70px", padding: "3px 8px", borderRadius: "999px", fontWeight: 700, textAlign: "center" },
   badgeNeutral: { backgroundColor: "#2a2f36", color: "#c8d0dc", border: "1px solid #4b5563" },
   badgeRed: { backgroundColor: "#4a1515", color: "#ffb3b3", border: "1px solid #8a2b2b" },
