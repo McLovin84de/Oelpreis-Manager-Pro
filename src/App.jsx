@@ -538,12 +538,42 @@ function App() {
       filters.marge !== "alle" ||
       filters.issue !== "alle"
   );
-  const activeFilterLabels = [
-    search.trim() ? `Suche: ${search.trim()}` : null,
-    filters.fluidTyp !== "alle" ? `Typ: ${filters.fluidTyp}` : null,
-    filters.kategorie !== "alle" ? `Kategorie: ${filters.kategorie}` : null,
-    filters.marge !== "alle" ? margeFilterLabels[filters.marge] : null,
-    filters.issue !== "alle" ? issueFilterLabels[filters.issue] : null,
+  const activeFilterItems = [
+    search.trim()
+      ? {
+          key: "search",
+          label: `Suche: ${search.trim()}`,
+          clear: () => setSearch(""),
+        }
+      : null,
+    filters.fluidTyp !== "alle"
+      ? {
+          key: "fluidTyp",
+          label: `Typ: ${filters.fluidTyp}`,
+          clear: () => setFilters((current) => ({ ...current, fluidTyp: "alle" })),
+        }
+      : null,
+    filters.kategorie !== "alle"
+      ? {
+          key: "kategorie",
+          label: `Kategorie: ${filters.kategorie}`,
+          clear: () => setFilters((current) => ({ ...current, kategorie: "alle" })),
+        }
+      : null,
+    filters.marge !== "alle"
+      ? {
+          key: "marge",
+          label: margeFilterLabels[filters.marge],
+          clear: () => setFilters((current) => ({ ...current, marge: "alle" })),
+        }
+      : null,
+    filters.issue !== "alle"
+      ? {
+          key: "issue",
+          label: issueFilterLabels[filters.issue],
+          clear: () => setFilters((current) => ({ ...current, issue: "alle" })),
+        }
+      : null,
   ].filter(Boolean);
 
   const stats = data.daten.reduce(
@@ -789,9 +819,12 @@ function App() {
       {hasActiveControls ? (
         <div style={styles.activeFilters}>
           <span style={styles.activeFiltersLabel}>Aktiv:</span>
-          {activeFilterLabels.map((label) => (
-            <span key={label} style={styles.activeFilterChip}>
-              {label}
+          {activeFilterItems.map((item) => (
+            <span key={item.key} style={styles.activeFilterChip}>
+              <span>{item.label}</span>
+              <button type="button" onClick={item.clear} style={styles.activeFilterRemove} title={`${item.label} entfernen`}>
+                ×
+              </button>
             </span>
           ))}
           <button type="button" onClick={resetControls} style={styles.resetButton}>
@@ -981,12 +1014,30 @@ const styles = {
   },
   activeFiltersLabel: { fontSize: "13px", fontWeight: 700, color: "#e0e0e0" },
   activeFilterChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "7px",
     border: "1px solid #4b5563",
     borderRadius: "999px",
     padding: "4px 9px",
     backgroundColor: "#20242b",
     color: "#dbe4f0",
     fontSize: "13px",
+  },
+  activeFilterRemove: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "18px",
+    height: "18px",
+    border: "1px solid #5f6b7a",
+    borderRadius: "999px",
+    padding: 0,
+    backgroundColor: "#29313b",
+    color: "#f4f4f4",
+    cursor: "pointer",
+    font: "inherit",
+    lineHeight: 1,
   },
   tableContainer: { overflowX: "auto", borderRadius: "8px", border: "1px solid #333", backgroundColor: "#1c1c1c" },
   table: { width: "100%", borderCollapse: "collapse" },
