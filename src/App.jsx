@@ -271,18 +271,56 @@ function App() {
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
 
-  const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
   const highlight = (text) => {
     const rawText = Array.isArray(text) ? text.join(", ") : String(text || "");
     if (!rawText) return "";
 
-    const safeText = escapeHtml(rawText);
-    if (!search) return safeText;
+    const normalizedNeedle = normalizeSearchText(search);
+    if (!normalizedNeedle) return escapeHtml(rawText);
 
-    const escapedSearch = escapeRegExp(escapeHtml(search));
-    const regex = new RegExp(`(${escapedSearch})`, "gi");
-    return safeText.replace(regex, (m) => `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${m}</span>`);
+    let normalizedText = "";
+    const indexMap = [];
+
+    for (let i = 0; i < rawText.length; i += 1) {
+      const normalizedChar = normalizeSearchText(rawText[i]);
+      for (let j = 0; j < normalizedChar.length; j += 1) {
+        normalizedText += normalizedChar[j];
+        indexMap.push(i);
+      }
+    }
+
+    const ranges = [];
+    let matchIndex = normalizedText.indexOf(normalizedNeedle);
+    while (matchIndex !== -1) {
+      const matchEnd = matchIndex + normalizedNeedle.length - 1;
+      ranges.push({ start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 });
+      matchIndex = normalizedText.indexOf(normalizedNeedle, matchIndex + normalizedNeedle.length);
+    }
+
+    if (!ranges.length) return escapeHtml(rawText);
+
+    const mergedRanges = ranges.reduce((merged, range) => {
+      const previous = merged[merged.length - 1];
+      if (previous && range.start <= previous.end) {
+        previous.end = Math.max(previous.end, range.end);
+      } else {
+        merged.push({ ...range });
+      }
+      return merged;
+    }, []);
+
+    let result = "";
+    let cursor = 0;
+    mergedRanges.forEach((range) => {
+      result += escapeHtml(rawText.slice(cursor, range.start));
+      result += `<span style="background-color: #ffeb3b; color: black; font-weight: 600;">${escapeHtml(
+        rawText.slice(range.start, range.end)
+      )}</span>`;
+      cursor = range.end;
+    });
+    result += escapeHtml(rawText.slice(cursor));
+
+    return result;
   };
 
   const getDisplayBezeichnung = (oil) => {
