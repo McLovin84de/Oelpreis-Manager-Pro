@@ -416,6 +416,29 @@ function App() {
     return result;
   };
 
+  const getFirstNormalizedMatchRange = (text, query) => {
+    const rawText = String(text || "");
+    const normalizedNeedle = normalizeSearchText(query);
+    if (!rawText || !normalizedNeedle) return null;
+
+    let normalizedText = "";
+    const indexMap = [];
+
+    for (let i = 0; i < rawText.length; i += 1) {
+      const normalizedChar = normalizeSearchText(rawText[i]);
+      for (let j = 0; j < normalizedChar.length; j += 1) {
+        normalizedText += normalizedChar[j];
+        indexMap.push(i);
+      }
+    }
+
+    const matchIndex = normalizedText.indexOf(normalizedNeedle);
+    if (matchIndex === -1) return null;
+
+    const matchEnd = matchIndex + normalizedNeedle.length - 1;
+    return { start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 };
+  };
+
   const getDisplayBezeichnung = (oil) => {
     const bezeichnung = String(oil.bezeichnung || "");
     const viskositaet = normalizeViskositaet(oil.viskositaet);
@@ -463,6 +486,21 @@ function App() {
     if (!text) return { text: "", isTruncated: false };
 
     if (text.length > 140) {
+      const searchMatch = getFirstNormalizedMatchRange(text, search);
+      if (searchMatch && searchMatch.end > 120) {
+        let start = Math.max(0, searchMatch.start - 60);
+        let end = Math.min(text.length, searchMatch.end + 80);
+
+        while (start > 0 && !/[\s,]/.test(text[start - 1])) start -= 1;
+        while (end < text.length && !/[\s,]/.test(text[end])) end += 1;
+
+        const snippet = text.slice(start, end).replace(/^[,\s]+|[,\s]+$/g, "");
+        return {
+          text: `${start > 0 ? "... " : ""}${snippet}${end < text.length ? " ..." : ""}`,
+          isTruncated: true,
+        };
+      }
+
       const previewByLength = text.slice(0, 140).replace(/\s+\S*$/, "").replace(/[,\s]+$/, "");
       return { text: `${previewByLength || text.slice(0, 140).trim()}...`, isTruncated: true };
     }
