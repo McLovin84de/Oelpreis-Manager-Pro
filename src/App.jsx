@@ -38,10 +38,15 @@ function App() {
     return `${n.toFixed(2)} €`;
   };
 
-  const renderRequiredEuro = (value) => {
+  const renderRequiredEuro = (value, perLiter = null) => {
     const n = toNumber(value);
     if (n <= 0) return <span style={styles.inlineWarning}>fehlt</span>;
-    return formatEuro(n);
+    return (
+      <>
+        <span>{formatEuro(n)}</span>
+        {perLiter && perLiter > 0 ? <div style={styles.subValue}>{formatEuroPerLiter(perLiter)}</div> : null}
+      </>
+    );
   };
 
   const formatPercent = (value) => {
@@ -115,6 +120,17 @@ function App() {
   const formatEuroPerLiter = (value) => {
     if (value === null || value === undefined) return "–";
     return `${toNumber(value).toFixed(2)} € /L`;
+  };
+
+  const getDisplayPricePerLiter = (oil, totalValue, explicitPerLiterKey) => {
+    const explicitValue = toNumber(oil[explicitPerLiterKey]);
+    if (explicitValue > 0) return explicitValue;
+
+    const total = toNumber(totalValue);
+    const liters = parseLiters(oil);
+    if (total <= 0 || liters <= 0 || Math.abs(liters - 1) < 0.001) return null;
+
+    return total / liters;
   };
 
   const normalizeSearchText = (value) =>
@@ -736,6 +752,8 @@ function App() {
             </thead>
             <tbody>
               {sortedFiltered.map((oil, i) => {
+                const ek = getEk(oil);
+                const vk = getVk(oil);
                 const marge = getMargeProzent(oil);
                 return (
                   <tr key={oil.artikelnummer || oil.interne_nummer || i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
@@ -747,8 +765,8 @@ function App() {
                     <td style={styles.td}>{oil.kategorie || "–"}</td>
                     <td style={styles.td}>{oil.fluid_typ || "–"}</td>
                     <td style={styles.td}>{oil.display_spezifikation || "–"}</td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(getEk(oil))}</td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(getVk(oil))}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(ek, getDisplayPricePerLiter(oil, ek, "ek_pro_liter"))}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(vk, getDisplayPricePerLiter(oil, vk, "preis_pro_liter"))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>
                       <span style={{ ...styles.badge, ...getMargeStyle(marge) }}>{formatPercent(marge)}</span>

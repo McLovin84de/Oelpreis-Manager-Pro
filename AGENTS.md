@@ -38,6 +38,7 @@
 - Kennzahlenkarten dienen als Schnellfilter, z. B. kritische Marge, Preis fehlt, Marge fehlt, Viskositaet offen und Freigaben fehlen.
 - Fluessigkeitstypen werden als klickbare Typ-Filter vorbereitet, damit spaeter auch Kuehlmittel, Bremsfluessigkeit und Getriebeoel direkt filterbar sind.
 - Die sichtbare Spalte `Viskositaet/Spez.` ist eine berechnete Anzeige. Sie nutzt `viskositaet` fuer Oele und erkennt spaeter z. B. `DOT 4`, `DOT 5.1`, `G12`, `G13`, `G40`, `D40`, `GL-4`, `GL-5` oder `ATF`.
+- EK/VK-Zellen duerfen zusaetzlich kompakte Literpreise anzeigen, ohne die Originalpreise zu veraendern.
 - Suche, Sortierung und Datenexport sollen weiter mit den Originalfeldern funktionieren.
 
 ## Export
