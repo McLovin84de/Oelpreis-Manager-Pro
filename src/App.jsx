@@ -3,10 +3,13 @@ import Fuse from "fuse.js";
 
 function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
+  const [loadStatus, setLoadStatus] = useState("loading");
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "artikelnummer", direction: "asc" });
   const [expandedFreigaben, setExpandedFreigaben] = useState({});
+  const [filters, setFilters] = useState({ fluidTyp: "alle", kategorie: "alle", marge: "alle" });
 
   const toNumber = (value) => {
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -58,6 +61,7 @@ function App() {
   };
 
   const getMargeStyle = (percent) => {
+    if (!hasValue(percent)) return styles.badgeNeutral;
     const p = toNumber(percent);
     if (p < 45) return styles.badgeRed;
     if (p < 60) return styles.badgeYellow;
@@ -192,16 +196,23 @@ function App() {
         const daten = Array.isArray(json?.daten) ? json.daten.map(normalizeOil) : [];
         setData({ stand_datum: json?.stand_datum || "Unbekannt", daten });
         setFiltered(daten);
+        setLoadStatus("ready");
+        setLoadError("");
       })
       .catch((err) => {
         console.error("❌ Fehler beim Laden der JSON:", err);
         setData({ stand_datum: "Unbekannt", daten: [] });
         setFiltered([]);
+        setLoadStatus("error");
+        setLoadError(err?.message || "Die Daten konnten nicht geladen werden.");
       });
   }, []);
 
   useEffect(() => {
-    if (!data?.daten?.length) return;
+    if (!data?.daten?.length) {
+      setFiltered([]);
+      return;
+    }
 
     const fuse = new Fuse(data.daten, {
       keys: [
@@ -217,24 +228,40 @@ function App() {
       threshold: 0.3,
     });
 
-    if (!search.trim()) {
-      setFiltered(data.daten);
-      return;
+    let searchMatches = data.daten;
+
+    if (search.trim()) {
+      const normalizedSearch = normalizeSearchText(search);
+      const directMatches = normalizedSearch
+        ? data.daten.filter((oil) => oil.search_text.includes(normalizedSearch))
+        : [];
+      const fuzzyMatches = fuse.search(search).map((r) => r.item);
+      const mergedMatches = new Map();
+
+      [...directMatches, ...fuzzyMatches].forEach((oil) => {
+        mergedMatches.set(`${oil.interne_nummer}-${oil.artikelnummer}`, oil);
+      });
+
+      searchMatches = [...mergedMatches.values()];
     }
 
-    const normalizedSearch = normalizeSearchText(search);
-    const directMatches = normalizedSearch
-      ? data.daten.filter((oil) => oil.search_text.includes(normalizedSearch))
-      : [];
-    const fuzzyMatches = fuse.search(search).map((r) => r.item);
-    const mergedMatches = new Map();
+    const nextFiltered = searchMatches.filter((oil) => {
+      if (filters.fluidTyp !== "alle" && oil.fluid_typ !== filters.fluidTyp) return false;
+      if (filters.kategorie !== "alle" && oil.kategorie !== filters.kategorie) return false;
 
-    [...directMatches, ...fuzzyMatches].forEach((oil) => {
-      mergedMatches.set(`${oil.interne_nummer}-${oil.artikelnummer}`, oil);
+      const marge = getMargeProzent(oil);
+      const hasMarge = hasValue(marge);
+
+      if (filters.marge === "kritisch") return hasMarge && toNumber(marge) < 45;
+      if (filters.marge === "beobachten") return hasMarge && toNumber(marge) >= 45 && toNumber(marge) < 60;
+      if (filters.marge === "gut") return hasMarge && toNumber(marge) >= 60;
+      if (filters.marge === "ohne") return !hasMarge;
+
+      return true;
     });
 
-    setFiltered([...mergedMatches.values()]);
-  }, [search, data]);
+    setFiltered(nextFiltered);
+  }, [search, data, filters]);
 
   const escapeHtml = (value) =>
     String(value)
@@ -370,6 +397,28 @@ function App() {
     return collator.compare(String(valueA), String(valueB)) * direction;
   });
 
+  const fluidTypOptions = [...new Set(data.daten.map((oil) => oil.fluid_typ).filter(Boolean))].sort(collator.compare);
+  const kategorieOptions = [...new Set(data.daten.map((oil) => oil.kategorie).filter(Boolean))].sort(collator.compare);
+  const hasActiveControls = Boolean(
+    search.trim() || filters.fluidTyp !== "alle" || filters.kategorie !== "alle" || filters.marge !== "alle"
+  );
+
+  const stats = data.daten.reduce(
+    (acc, oil) => {
+      const marge = getMargeProzent(oil);
+      if (!hasValue(getEk(oil)) || !hasValue(getVk(oil)) || getEk(oil) <= 0 || getVk(oil) <= 0) acc.missingPrices += 1;
+      if (hasValue(marge) && toNumber(marge) < 45) acc.lowMargin += 1;
+      if (!hasValue(marge)) acc.missingMargin += 1;
+      return acc;
+    },
+    { lowMargin: 0, missingPrices: 0, missingMargin: 0 }
+  );
+
+  const resetControls = () => {
+    setSearch("");
+    setFilters({ fluidTyp: "alle", kategorie: "alle", marge: "alle" });
+  };
+
   const handleSort = (key) => {
     setSortConfig((current) => ({
       key,
@@ -391,21 +440,98 @@ function App() {
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Ölpreis-Manager Pro</h1>
-
-      <div style={styles.infoBox}>
-        📅 <strong>Datenstand:</strong> {data?.stand_datum || "Unbekannt"} | <strong>Artikel:</strong> {data?.daten?.length || 0} | <strong>Treffer:</strong> {filtered.length}
+      <div style={styles.header}>
+        <div>
+          <h1 style={styles.title}>Ölpreis-Manager Pro</h1>
+          <div style={styles.metaLine}>Datenstand: {data?.stand_datum || "Unbekannt"}</div>
+        </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="🔍 Suche nach Artikelnummer, HArtNr, Freigabe, Hersteller..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={styles.search}
-      />
+      <div style={styles.summaryGrid}>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Artikel</span>
+          <strong style={styles.statValue}>{data?.daten?.length || 0}</strong>
+        </div>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Treffer</span>
+          <strong style={styles.statValue}>{filtered.length}</strong>
+        </div>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Marge kritisch</span>
+          <strong style={stats.lowMargin ? styles.statValueWarning : styles.statValue}>{stats.lowMargin}</strong>
+        </div>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Preis fehlt</span>
+          <strong style={stats.missingPrices ? styles.statValueWarning : styles.statValue}>{stats.missingPrices}</strong>
+        </div>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Marge fehlt</span>
+          <strong style={stats.missingMargin ? styles.statValueWarning : styles.statValue}>{stats.missingMargin}</strong>
+        </div>
+      </div>
 
-      {filtered.length > 0 ? (
+      <div style={styles.toolbar}>
+        <input
+          type="text"
+          placeholder="Suche nach Artikelnummer, Hersteller-Art.-Nr., Freigabe, Hersteller..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={styles.search}
+        />
+
+        <select
+          aria-label="Typ filtern"
+          value={filters.fluidTyp}
+          onChange={(e) => setFilters((current) => ({ ...current, fluidTyp: e.target.value }))}
+          style={styles.select}
+        >
+          <option value="alle">Alle Typen</option>
+          {fluidTypOptions.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Kategorie filtern"
+          value={filters.kategorie}
+          onChange={(e) => setFilters((current) => ({ ...current, kategorie: e.target.value }))}
+          style={styles.select}
+        >
+          <option value="alle">Alle Kategorien</option>
+          {kategorieOptions.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Marge filtern"
+          value={filters.marge}
+          onChange={(e) => setFilters((current) => ({ ...current, marge: e.target.value }))}
+          style={styles.select}
+        >
+          <option value="alle">Alle Margen</option>
+          <option value="kritisch">Unter 45 %</option>
+          <option value="beobachten">45 bis 59 %</option>
+          <option value="gut">Ab 60 %</option>
+          <option value="ohne">Ohne Marge</option>
+        </select>
+
+        {hasActiveControls ? (
+          <button type="button" onClick={resetControls} style={styles.resetButton}>
+            Zurücksetzen
+          </button>
+        ) : null}
+      </div>
+
+      {loadStatus === "loading" ? (
+        <p style={styles.noData}>Daten werden geladen...</p>
+      ) : loadStatus === "error" ? (
+        <div style={styles.errorBox}>Daten konnten nicht geladen werden: {loadError}</div>
+      ) : filtered.length > 0 ? (
         <div style={styles.tableContainer}>
           <table style={styles.table}>
             <thead>
@@ -428,7 +554,7 @@ function App() {
               {sortedFiltered.map((oil, i) => {
                 const marge = getMargeProzent(oil);
                 return (
-                  <tr key={i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
+                  <tr key={oil.artikelnummer || oil.interne_nummer || i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
                     <td style={styles.td}>{oil.artikelnummer || oil.interne_nummer || "–"}</td>
                     <td style={styles.td}>{oil.hersteller_artikelnummer || "–"}</td>
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(getDisplayBezeichnung(oil)) }} />
@@ -458,13 +584,61 @@ function App() {
 }
 
 const styles = {
-  page: { backgroundColor: "#121212", color: "#e0e0e0", fontFamily: "Segoe UI, Roboto, sans-serif", padding: "30px", minHeight: "100vh" },
-  title: { fontSize: "28px", fontWeight: "bold", color: "#ffeb3b", marginBottom: "10px" },
-  infoBox: { backgroundColor: "#1e1e1e", display: "inline-block", padding: "6px 12px", borderRadius: "6px", marginBottom: "15px", color: "#ccc" },
-  search: { padding: "10px", borderRadius: "6px", width: "100%", maxWidth: "620px", border: "1px solid #444", backgroundColor: "#1e1e1e", color: "#e0e0e0", marginBottom: "20px" },
+  page: {
+    backgroundColor: "#121212",
+    color: "#e0e0e0",
+    fontFamily: "Segoe UI, Roboto, sans-serif",
+    padding: "30px",
+    minHeight: "100vh",
+  },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "20px", marginBottom: "18px" },
+  title: { fontSize: "28px", fontWeight: "bold", color: "#ffeb3b", margin: "0 0 6px" },
+  metaLine: { color: "#b8bec9", fontSize: "14px" },
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+    gap: "10px",
+    marginBottom: "16px",
+  },
+  statCard: {
+    backgroundColor: "#1e1e1e",
+    border: "1px solid #333",
+    borderRadius: "8px",
+    padding: "12px 14px",
+    minHeight: "68px",
+  },
+  statLabel: { display: "block", color: "#aeb4be", fontSize: "12px", marginBottom: "6px" },
+  statValue: { color: "#f4f4f4", fontSize: "24px", lineHeight: 1 },
+  statValueWarning: { color: "#ffe28a", fontSize: "24px", lineHeight: 1 },
+  toolbar: { display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center", marginBottom: "20px" },
+  search: {
+    flex: "1 1 420px",
+    padding: "10px",
+    borderRadius: "6px",
+    minWidth: "260px",
+    border: "1px solid #444",
+    backgroundColor: "#1e1e1e",
+    color: "#e0e0e0",
+  },
+  select: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #444",
+    backgroundColor: "#1e1e1e",
+    color: "#e0e0e0",
+  },
+  resetButton: {
+    border: "1px solid #555",
+    borderRadius: "6px",
+    padding: "10px 12px",
+    backgroundColor: "#242424",
+    color: "#ffeb3b",
+    cursor: "pointer",
+    font: "inherit",
+  },
   tableContainer: { overflowX: "auto", borderRadius: "8px", border: "1px solid #333", backgroundColor: "#1c1c1c" },
   table: { width: "100%", borderCollapse: "collapse" },
-  th: { textAlign: "left", backgroundColor: "#222", color: "#ffeb3b", padding: "10px", borderBottom: "2px solid #333", position: "sticky", top: 0 },
+  th: { textAlign: "left", backgroundColor: "#222", color: "#ffeb3b", padding: "10px", borderBottom: "2px solid #333", position: "sticky", top: 0, zIndex: 1 },
   sortButton: { display: "inline-flex", alignItems: "center", gap: "6px", width: "100%", border: 0, padding: 0, background: "transparent", color: "inherit", font: "inherit", fontWeight: 700, textAlign: "left", cursor: "pointer" },
   sortIcon: { color: "#777", fontSize: "11px" },
   sortIconActive: { color: "#ffeb3b", fontSize: "11px" },
@@ -474,7 +648,9 @@ const styles = {
   tr: { backgroundColor: "#1a1a1a" },
   trAlt: { backgroundColor: "#181818" },
   noData: { marginTop: "20px", fontStyle: "italic", color: "#aaa" },
+  errorBox: { backgroundColor: "#4a1515", border: "1px solid #8a2b2b", color: "#ffb3b3", borderRadius: "8px", padding: "12px 14px" },
   badge: { display: "inline-block", minWidth: "70px", padding: "3px 8px", borderRadius: "999px", fontWeight: 700, textAlign: "center" },
+  badgeNeutral: { backgroundColor: "#2a2f36", color: "#c8d0dc", border: "1px solid #4b5563" },
   badgeRed: { backgroundColor: "#4a1515", color: "#ffb3b3", border: "1px solid #8a2b2b" },
   badgeYellow: { backgroundColor: "#4a3d12", color: "#ffe28a", border: "1px solid #8a742b" },
   badgeGreen: { backgroundColor: "#153d24", color: "#9af0b8", border: "1px solid #2f8a50" },
