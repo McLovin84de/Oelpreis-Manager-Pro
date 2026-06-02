@@ -25,9 +25,9 @@
 
 ## Bekannte Datenlage
 - Datenstand zuletzt: `2026-05-29 13:16`.
-- 44 Datensaetze.
+- 43 Datensaetze.
 - `OEL-010` hat absichtlich eine leere `viskositaet`.
-- `OEL-037` hat `nettopreis` 0; abgeleitete Werte bleiben defensiv leer/null.
+- `OEL-037` wurde entfernt, weil der Artikel nicht mehr im Bestand ist.
 - `public/data/localdb.json` und `src/data/localdb.json` sollen identisch bleiben.
 
 ## UI-Stand
