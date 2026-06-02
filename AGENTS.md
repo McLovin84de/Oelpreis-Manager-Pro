@@ -35,10 +35,15 @@
 - Bezeichnung wird nur in der Anzeige von doppelter Viskositaet bereinigt.
 - Freigaben sind per `mehr` / `weniger` einklappbar.
 - Freigaben werden nur in der Anzeige entdoppelt; Originaldaten bleiben unveraendert.
+- Kennzahlenkarten dienen als Schnellfilter, z. B. kritische Marge, Preis fehlt, Marge fehlt, Viskositaet offen und Freigaben fehlen.
+- Fluessigkeitstypen werden als klickbare Typ-Filter vorbereitet, damit spaeter auch Kuehlmittel, Bremsfluessigkeit und Getriebeoel direkt filterbar sind.
 - Suche, Sortierung und Datenexport sollen weiter mit den Originalfeldern funktionieren.
 
 ## Export
 - `OelExport/oel_json_export_v3.py` erzeugt `fluid_typ`, `viskositaet` und `bemerkungen`.
+- Die Typ-Erkennung beruecksichtigt Bezeichnung und Freigaben/Bemerkungen.
+- `ml`-Gebinde werden fuer spaetere Betriebsstoffe beruecksichtigt.
+- Automatische Oel-Verkaufspreisregeln sollen nur fuer `Motoroel` greifen, nicht fuer Kuehlmittel oder Bremsfluessigkeit.
 - Exportskript nicht ohne Freigabe ausfuehren, weil es JSON-Dateien und Backups schreiben kann.
 
 ## Git/GitHub

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
 const getDefaultFilters = () => ({ fluidTyp: "alle", kategorie: "alle", marge: "alle", issue: "alle" });
+const fluidTypeOrder = ["Motoröl", "Getriebeöl", "Kühlmittel", "Bremsflüssigkeit", "Sonstiges"];
 
 function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
@@ -63,6 +64,9 @@ function App() {
   };
 
   const hasMissingPrice = (oil) => getEk(oil) <= 0 || getVk(oil) <= 0;
+  const needsViskositaet = (oil) => ["Motoröl", "Getriebeöl"].includes(oil.fluid_typ);
+  const hasOpenViskositaet = (oil) => needsViskositaet(oil) && !hasValue(oil.viskositaet);
+  const hasMissingFreigaben = (oil) => !hasValue(oil.freigaben);
 
   const getMargeStyle = (percent) => {
     if (!hasValue(percent)) return styles.badgeNeutral;
@@ -135,15 +139,14 @@ function App() {
     const isViscosity = Boolean(normalizeViskositaet(existing));
     if (existing && !isViscosity) return existing;
 
-    const text = String(oil.bezeichnung || "").toLowerCase();
-    if (text.includes("motoröl") || text.includes("motorol")) return "Motoröl";
-    if (text.includes("getriebeöl") || text.includes("getriebeoel") || text.includes("getriebe") || text.includes("atf")) {
-      return "Getriebeöl";
+    const text = normalizeSearchText([oil.bezeichnung, oil.freigaben, oil.bemerkungen].join(" "));
+    if (text.includes("bremsflussigkeit") || /\bdot[345]\b/.test(text) || text.includes("dot51")) {
+      return "Bremsflüssigkeit";
     }
     if (
-      text.includes("kühlmittel") ||
+      text.includes("kuhlmittel") ||
       text.includes("kuehlmittel") ||
-      text.includes("kühlerfrostschutz") ||
+      text.includes("kuhlerfrostschutz") ||
       text.includes("kuehlerfrostschutz") ||
       text.includes("frostschutz") ||
       text.includes("g12") ||
@@ -153,9 +156,19 @@ function App() {
     ) {
       return "Kühlmittel";
     }
-    if (text.includes("bremsflüssigkeit") || text.includes("bremsfluessigkeit") || text.includes("dot")) {
-      return "Bremsflüssigkeit";
+    if (
+      text.includes("getriebeol") ||
+      text.includes("getriebeoel") ||
+      text.includes("getriebe") ||
+      text.includes("atf") ||
+      text.includes("gl4") ||
+      text.includes("gl5") ||
+      /\b75w\d{2,3}\b/.test(text) ||
+      /\b80w\d{2,3}\b/.test(text)
+    ) {
+      return "Getriebeöl";
     }
+    if (text.includes("motorol") || text.includes("motoroel") || /\b[015]w\d{2}\b/.test(text) || /\b10w\d{2}\b/.test(text)) return "Motoröl";
     return "Sonstiges";
   };
 
@@ -253,6 +266,8 @@ function App() {
       if (filters.fluidTyp !== "alle" && oil.fluid_typ !== filters.fluidTyp) return false;
       if (filters.kategorie !== "alle" && oil.kategorie !== filters.kategorie) return false;
       if (filters.issue === "preisFehlt" && !hasMissingPrice(oil)) return false;
+      if (filters.issue === "viskositaetOffen" && !hasOpenViskositaet(oil)) return false;
+      if (filters.issue === "freigabenFehlen" && !hasMissingFreigaben(oil)) return false;
 
       const marge = getMargeProzent(oil);
       const hasMarge = hasValue(marge);
@@ -454,12 +469,18 @@ function App() {
     (acc, oil) => {
       const marge = getMargeProzent(oil);
       if (hasMissingPrice(oil)) acc.missingPrices += 1;
+      if (hasOpenViskositaet(oil)) acc.openViskositaet += 1;
+      if (hasMissingFreigaben(oil)) acc.missingFreigaben += 1;
       if (hasValue(marge) && toNumber(marge) < 45) acc.lowMargin += 1;
       if (!hasValue(marge)) acc.missingMargin += 1;
       return acc;
     },
-    { lowMargin: 0, missingPrices: 0, missingMargin: 0 }
+    { lowMargin: 0, missingPrices: 0, missingMargin: 0, openViskositaet: 0, missingFreigaben: 0 }
   );
+
+  const fluidTypeCounts = fluidTypeOrder
+    .map((type) => ({ type, count: data.daten.filter((oil) => oil.fluid_typ === type).length }))
+    .filter((item) => item.count > 0);
 
   const resetControls = () => {
     setSearch("");
@@ -469,6 +490,11 @@ function App() {
   const applyStatFilter = (nextFilters) => {
     setSearch("");
     setFilters({ ...getDefaultFilters(), ...nextFilters });
+  };
+
+  const applyFluidTypeFilter = (fluidTyp) => {
+    setSearch("");
+    setFilters({ ...getDefaultFilters(), fluidTyp });
   };
 
   const renderStatCard = ({ label, value, isWarning, isActive, onClick, title }) => {
@@ -513,7 +539,7 @@ function App() {
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Ölpreis-Manager Pro</h1>
-          <div style={styles.metaLine}>Datenstand: {data?.stand_datum || "Unbekannt"}</div>
+          <div style={styles.metaLine}>Öle und Betriebsstoffe | Datenstand: {data?.stand_datum || "Unbekannt"}</div>
         </div>
       </div>
 
@@ -549,12 +575,45 @@ function App() {
           onClick: () => applyStatFilter({ marge: "ohne" }),
           title: "Artikel ohne berechenbare Marge anzeigen",
         })}
+        {renderStatCard({
+          label: "Viskosität offen",
+          value: stats.openViskositaet,
+          isWarning: stats.openViskositaet > 0,
+          isActive: filters.issue === "viskositaetOffen",
+          onClick: () => applyStatFilter({ issue: "viskositaetOffen" }),
+          title: "Öl-Artikel ohne Viskosität anzeigen",
+        })}
+        {renderStatCard({
+          label: "Freigaben fehlen",
+          value: stats.missingFreigaben,
+          isWarning: stats.missingFreigaben > 0,
+          isActive: filters.issue === "freigabenFehlen",
+          onClick: () => applyStatFilter({ issue: "freigabenFehlen" }),
+          title: "Artikel ohne Freigaben anzeigen",
+        })}
       </div>
+
+      {fluidTypeCounts.length > 0 ? (
+        <div style={styles.typeFilterRow}>
+          {fluidTypeCounts.map(({ type, count }) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => applyFluidTypeFilter(type)}
+              style={{ ...styles.typeButton, ...(filters.fluidTyp === type ? styles.typeButtonActive : null) }}
+              title={`${type} anzeigen`}
+            >
+              <span>{type}</span>
+              <strong>{count}</strong>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div style={styles.toolbar}>
         <input
           type="text"
-          placeholder="Suche nach Artikelnummer, Hersteller-Art.-Nr., Freigabe, Hersteller..."
+          placeholder="Suche nach Artikelnummer, Hersteller-Art.-Nr., Freigabe, Hersteller, Typ..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={styles.search}
@@ -702,6 +761,29 @@ const styles = {
   statLabel: { display: "block", color: "#aeb4be", fontSize: "12px", marginBottom: "6px" },
   statValue: { color: "#f4f4f4", fontSize: "24px", lineHeight: 1 },
   statValueWarning: { color: "#ffe28a", fontSize: "24px", lineHeight: 1 },
+  typeFilterRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    marginBottom: "16px",
+  },
+  typeButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "10px",
+    border: "1px solid #3a3a3a",
+    borderRadius: "8px",
+    padding: "8px 12px",
+    backgroundColor: "#1e1e1e",
+    color: "#e0e0e0",
+    cursor: "pointer",
+    font: "inherit",
+  },
+  typeButtonActive: {
+    borderColor: "#ffeb3b",
+    backgroundColor: "#272410",
+    color: "#ffeb3b",
+  },
   toolbar: { display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center", marginBottom: "20px" },
   search: {
     flex: "1 1 420px",

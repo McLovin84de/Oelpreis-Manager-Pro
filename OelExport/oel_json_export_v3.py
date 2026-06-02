@@ -2,6 +2,7 @@ import json
 import os
 import re
 import shutil
+import unicodedata
 from datetime import datetime
 
 import pandas as pd
@@ -53,6 +54,9 @@ def parse_liters(bezeichnung):
     match = re.search(r"(\d+(?:[.,]\d+)?)\s*l\b", text)
     if match:
         return float(match.group(1).replace(",", "."))
+    ml_match = re.search(r"(\d+(?:[.,]\d+)?)\s*ml\b", text)
+    if ml_match:
+        return float(ml_match.group(1).replace(",", ".")) / 1000
     return 1.0
 
 
@@ -121,26 +125,22 @@ def next_internal_number(used_numbers):
             return candidate
 
 
-def detect_fluid_typ(bezeichnung):
-    text = str(bezeichnung or "").lower()
-    if "motoröl" in text or "motorol" in text:
-        return "Motoröl"
-    if "getriebeöl" in text or "getriebeoel" in text or "getriebe" in text or "atf" in text:
-        return "Getriebeöl"
-    if (
-        "kühlmittel" in text
-        or "kuehlmittel" in text
-        or "kühlerfrostschutz" in text
-        or "kuehlerfrostschutz" in text
-        or "frostschutz" in text
-        or "g12" in text
-        or "g13" in text
-        or "g40" in text
-        or "d40" in text
-    ):
-        return "Kühlmittel"
-    if "bremsflüssigkeit" in text or "bremsfluessigkeit" in text or "dot" in text:
+def normalize_token_text(*values):
+    text = " ".join(str(value or "") for value in values).lower()
+    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", "", text)
+
+
+def detect_fluid_typ(*values):
+    text = normalize_token_text(*values)
+    if "bremsflussigkeit" in text or re.search(r"dot(?:3|4|5|51)", text):
         return "Bremsflüssigkeit"
+    if any(term in text for term in ["kuhlmittel", "kuehlmittel", "kuhlerfrostschutz", "kuehlerfrostschutz", "frostschutz", "g12", "g13", "g40", "d40"]):
+        return "Kühlmittel"
+    if any(term in text for term in ["getriebeol", "getriebeoel", "getriebe", "atf", "gl4", "gl5"]) or re.search(r"(?:75|80)w\d{2,3}", text):
+        return "Getriebeöl"
+    if "motorol" in text or "motoroel" in text or re.search(r"(?:0|5|10|15)w\d{2}", text):
+        return "Motoröl"
     return "Sonstiges"
 
 
@@ -194,10 +194,11 @@ def export_json(df):
         nettopreis_raw = safe_get(row, "nettopreislieferant") or safe_get(row, "nettopreis_lieferant") or safe_get(row, "nettopreis")
         nettopreis = to_float(nettopreis_raw)
         gebinde_l = parse_liters(bezeichnung)
-        fluid_typ = detect_fluid_typ(bezeichnung)
+        fluid_typ = detect_fluid_typ(bezeichnung, freigaben)
         viskositaet = detect_viskositaet(bezeichnung, freigaben)
         kategorie = detect_category(bezeichnung, freigaben)
-        vk1 = apply_sale_price_rules(to_float(safe_get(row, "vk1")), kategorie, gebinde_l)
+        vk1_raw = to_float(safe_get(row, "vk1"))
+        vk1 = apply_sale_price_rules(vk1_raw, kategorie, gebinde_l) if fluid_typ == "Motoröl" else vk1_raw
 
         rohertrag = (vk1 - nettopreis) if vk1 > 0 else 0
         marge_prozent = (((vk1 - nettopreis) / vk1) * 100) if vk1 > 0 else 0
