@@ -15,6 +15,19 @@ const issueFilterLabels = {
   freigabenFehlen: "Freigaben fehlen",
   typPruefen: "Typ prüfen",
 };
+const quickFreigabeCandidates = [
+  { label: "VW 504 00", query: "50400" },
+  { label: "VW 507 00", query: "50700" },
+  { label: "VW 508 00", query: "50800" },
+  { label: "VW 509 00", query: "50900" },
+  { label: "ACEA C3", query: "acea c3" },
+  { label: "ACEA C5", query: "acea c5" },
+  { label: "ACEA C6", query: "acea c6" },
+  { label: "MB 229.51", query: "22951" },
+  { label: "MB 229.52", query: "22952" },
+  { label: "Porsche C30", query: "porsche c30" },
+  { label: "API SN", query: "api sn" },
+];
 
 function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
@@ -550,6 +563,12 @@ function App() {
   const fluidTypeCounts = fluidTypeOrder
     .map((type) => ({ type, count: data.daten.filter((oil) => oil.fluid_typ === type).length }))
     .filter((item) => item.count > 0);
+  const quickFreigabeChips = quickFreigabeCandidates
+    .map((chip) => ({
+      ...chip,
+      count: data.daten.filter((oil) => oil.search_text.includes(normalizeSearchText(chip.query))).length,
+    }))
+    .filter((chip) => chip.count > 0);
 
   const resetControls = () => {
     setSearch("");
@@ -564,6 +583,11 @@ function App() {
   const applyFluidTypeFilter = (fluidTyp) => {
     setSearch("");
     setFilters({ ...getDefaultFilters(), fluidTyp });
+  };
+
+  const applyQuickFreigabe = (query) => {
+    setSearch(query);
+    setFilters(getDefaultFilters());
   };
 
   const renderStatCard = ({ label, value, isWarning, isActive, onClick, title }) => {
@@ -686,6 +710,27 @@ function App() {
               <strong>{count}</strong>
             </button>
           ))}
+        </div>
+      ) : null}
+
+      {quickFreigabeChips.length > 0 ? (
+        <div style={styles.quickFilterRow}>
+          <span style={styles.quickFilterLabel}>Häufige Freigaben:</span>
+          {quickFreigabeChips.map((chip) => {
+            const isActive = normalizeSearchText(search) === normalizeSearchText(chip.query);
+            return (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => applyQuickFreigabe(chip.query)}
+                style={{ ...styles.quickFilterButton, ...(isActive ? styles.quickFilterButtonActive : null) }}
+                title={`${chip.label} suchen`}
+              >
+                <span>{chip.label}</span>
+                <strong>{chip.count}</strong>
+              </button>
+            );
+          })}
         </div>
       ) : null}
 
@@ -870,6 +915,32 @@ const styles = {
     font: "inherit",
   },
   typeButtonActive: {
+    borderColor: "#ffeb3b",
+    backgroundColor: "#272410",
+    color: "#ffeb3b",
+  },
+  quickFilterRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "16px",
+  },
+  quickFilterLabel: { color: "#aeb4be", fontSize: "13px", fontWeight: 700, marginRight: "2px" },
+  quickFilterButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    border: "1px solid #3a3a3a",
+    borderRadius: "999px",
+    padding: "6px 10px",
+    backgroundColor: "#1e1e1e",
+    color: "#e0e0e0",
+    cursor: "pointer",
+    font: "inherit",
+    fontSize: "13px",
+  },
+  quickFilterButtonActive: {
     borderColor: "#ffeb3b",
     backgroundColor: "#272410",
     color: "#ffeb3b",
