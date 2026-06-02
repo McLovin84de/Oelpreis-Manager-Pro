@@ -3,6 +3,18 @@ import Fuse from "fuse.js";
 
 const getDefaultFilters = () => ({ fluidTyp: "alle", kategorie: "alle", marge: "alle", issue: "alle" });
 const fluidTypeOrder = ["Motoröl", "Getriebeöl", "Kühlmittel", "Bremsflüssigkeit", "Sonstiges"];
+const margeFilterLabels = {
+  kritisch: "Marge unter 45 %",
+  beobachten: "Marge 45 bis 59 %",
+  gut: "Marge ab 60 %",
+  ohne: "Marge fehlt",
+};
+const issueFilterLabels = {
+  preisFehlt: "Preis fehlt",
+  spezifikationOffen: "Spezifikation offen",
+  freigabenFehlen: "Freigaben fehlen",
+  typPruefen: "Typ prüfen",
+};
 
 function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
@@ -513,6 +525,13 @@ function App() {
       filters.marge !== "alle" ||
       filters.issue !== "alle"
   );
+  const activeFilterLabels = [
+    search.trim() ? `Suche: ${search.trim()}` : null,
+    filters.fluidTyp !== "alle" ? `Typ: ${filters.fluidTyp}` : null,
+    filters.kategorie !== "alle" ? `Kategorie: ${filters.kategorie}` : null,
+    filters.marge !== "alle" ? margeFilterLabels[filters.marge] : null,
+    filters.issue !== "alle" ? issueFilterLabels[filters.issue] : null,
+  ].filter(Boolean);
 
   const stats = data.daten.reduce(
     (acc, oil) => {
@@ -720,12 +739,21 @@ function App() {
           <option value="ohne">Ohne Marge</option>
         </select>
 
-        {hasActiveControls ? (
+      </div>
+
+      {hasActiveControls ? (
+        <div style={styles.activeFilters}>
+          <span style={styles.activeFiltersLabel}>Aktiv:</span>
+          {activeFilterLabels.map((label) => (
+            <span key={label} style={styles.activeFilterChip}>
+              {label}
+            </span>
+          ))}
           <button type="button" onClick={resetControls} style={styles.resetButton}>
             Zurücksetzen
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {loadStatus === "loading" ? (
         <p style={styles.noData}>Daten werden geladen...</p>
@@ -871,6 +899,23 @@ const styles = {
     color: "#ffeb3b",
     cursor: "pointer",
     font: "inherit",
+  },
+  activeFilters: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "8px",
+    margin: "-8px 0 18px",
+    color: "#b8bec9",
+  },
+  activeFiltersLabel: { fontSize: "13px", fontWeight: 700, color: "#e0e0e0" },
+  activeFilterChip: {
+    border: "1px solid #4b5563",
+    borderRadius: "999px",
+    padding: "4px 9px",
+    backgroundColor: "#20242b",
+    color: "#dbe4f0",
+    fontSize: "13px",
   },
   tableContainer: { overflowX: "auto", borderRadius: "8px", border: "1px solid #333", backgroundColor: "#1c1c1c" },
   table: { width: "100%", borderCollapse: "collapse" },
