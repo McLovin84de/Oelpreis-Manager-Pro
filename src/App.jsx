@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
+const getDefaultFilters = () => ({ fluidTyp: "alle", kategorie: "alle", marge: "alle", issue: "alle" });
+
 function App() {
   const [data, setData] = useState({ stand_datum: "Unbekannt", daten: [] });
   const [loadStatus, setLoadStatus] = useState("loading");
@@ -9,7 +11,7 @@ function App() {
   const [filtered, setFiltered] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "artikelnummer", direction: "asc" });
   const [expandedFreigaben, setExpandedFreigaben] = useState({});
-  const [filters, setFilters] = useState({ fluidTyp: "alle", kategorie: "alle", marge: "alle" });
+  const [filters, setFilters] = useState(getDefaultFilters);
 
   const toNumber = (value) => {
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -59,6 +61,8 @@ function App() {
     if (!vk || !ek) return null;
     return ((vk - ek) / vk) * 100;
   };
+
+  const hasMissingPrice = (oil) => getEk(oil) <= 0 || getVk(oil) <= 0;
 
   const getMargeStyle = (percent) => {
     if (!hasValue(percent)) return styles.badgeNeutral;
@@ -248,6 +252,7 @@ function App() {
     const nextFiltered = searchMatches.filter((oil) => {
       if (filters.fluidTyp !== "alle" && oil.fluid_typ !== filters.fluidTyp) return false;
       if (filters.kategorie !== "alle" && oil.kategorie !== filters.kategorie) return false;
+      if (filters.issue === "preisFehlt" && !hasMissingPrice(oil)) return false;
 
       const marge = getMargeProzent(oil);
       const hasMarge = hasValue(marge);
@@ -438,13 +443,17 @@ function App() {
   const fluidTypOptions = [...new Set(data.daten.map((oil) => oil.fluid_typ).filter(Boolean))].sort(collator.compare);
   const kategorieOptions = [...new Set(data.daten.map((oil) => oil.kategorie).filter(Boolean))].sort(collator.compare);
   const hasActiveControls = Boolean(
-    search.trim() || filters.fluidTyp !== "alle" || filters.kategorie !== "alle" || filters.marge !== "alle"
+    search.trim() ||
+      filters.fluidTyp !== "alle" ||
+      filters.kategorie !== "alle" ||
+      filters.marge !== "alle" ||
+      filters.issue !== "alle"
   );
 
   const stats = data.daten.reduce(
     (acc, oil) => {
       const marge = getMargeProzent(oil);
-      if (!hasValue(getEk(oil)) || !hasValue(getVk(oil)) || getEk(oil) <= 0 || getVk(oil) <= 0) acc.missingPrices += 1;
+      if (hasMissingPrice(oil)) acc.missingPrices += 1;
       if (hasValue(marge) && toNumber(marge) < 45) acc.lowMargin += 1;
       if (!hasValue(marge)) acc.missingMargin += 1;
       return acc;
@@ -454,7 +463,30 @@ function App() {
 
   const resetControls = () => {
     setSearch("");
-    setFilters({ fluidTyp: "alle", kategorie: "alle", marge: "alle" });
+    setFilters(getDefaultFilters());
+  };
+
+  const applyStatFilter = (nextFilters) => {
+    setSearch("");
+    setFilters({ ...getDefaultFilters(), ...nextFilters });
+  };
+
+  const renderStatCard = ({ label, value, isWarning, isActive, onClick, title }) => {
+    const content = (
+      <>
+        <span style={styles.statLabel}>{label}</span>
+        <strong style={isWarning ? styles.statValueWarning : styles.statValue}>{value}</strong>
+      </>
+    );
+    const cardStyle = { ...styles.statCard, ...(isActive ? styles.statCardActive : null) };
+
+    if (!onClick) return <div style={cardStyle}>{content}</div>;
+
+    return (
+      <button type="button" onClick={onClick} style={{ ...cardStyle, ...styles.statButton }} title={title}>
+        {content}
+      </button>
+    );
   };
 
   const handleSort = (key) => {
@@ -486,26 +518,37 @@ function App() {
       </div>
 
       <div style={styles.summaryGrid}>
-        <div style={styles.statCard}>
-          <span style={styles.statLabel}>Artikel</span>
-          <strong style={styles.statValue}>{data?.daten?.length || 0}</strong>
-        </div>
-        <div style={styles.statCard}>
-          <span style={styles.statLabel}>Treffer</span>
-          <strong style={styles.statValue}>{filtered.length}</strong>
-        </div>
-        <div style={styles.statCard}>
-          <span style={styles.statLabel}>Marge kritisch</span>
-          <strong style={stats.lowMargin ? styles.statValueWarning : styles.statValue}>{stats.lowMargin}</strong>
-        </div>
-        <div style={styles.statCard}>
-          <span style={styles.statLabel}>Preis fehlt</span>
-          <strong style={stats.missingPrices ? styles.statValueWarning : styles.statValue}>{stats.missingPrices}</strong>
-        </div>
-        <div style={styles.statCard}>
-          <span style={styles.statLabel}>Marge fehlt</span>
-          <strong style={stats.missingMargin ? styles.statValueWarning : styles.statValue}>{stats.missingMargin}</strong>
-        </div>
+        {renderStatCard({
+          label: "Artikel",
+          value: data?.daten?.length || 0,
+          onClick: resetControls,
+          title: "Alle Artikel anzeigen",
+        })}
+        {renderStatCard({ label: "Treffer", value: filtered.length })}
+        {renderStatCard({
+          label: "Marge kritisch",
+          value: stats.lowMargin,
+          isWarning: stats.lowMargin > 0,
+          isActive: filters.marge === "kritisch",
+          onClick: () => applyStatFilter({ marge: "kritisch" }),
+          title: "Artikel mit kritischer Marge anzeigen",
+        })}
+        {renderStatCard({
+          label: "Preis fehlt",
+          value: stats.missingPrices,
+          isWarning: stats.missingPrices > 0,
+          isActive: filters.issue === "preisFehlt",
+          onClick: () => applyStatFilter({ issue: "preisFehlt" }),
+          title: "Artikel mit fehlendem Preis anzeigen",
+        })}
+        {renderStatCard({
+          label: "Marge fehlt",
+          value: stats.missingMargin,
+          isWarning: stats.missingMargin > 0,
+          isActive: filters.marge === "ohne",
+          onClick: () => applyStatFilter({ marge: "ohne" }),
+          title: "Artikel ohne berechenbare Marge anzeigen",
+        })}
       </div>
 
       <div style={styles.toolbar}>
@@ -644,6 +687,17 @@ const styles = {
     borderRadius: "8px",
     padding: "12px 14px",
     minHeight: "68px",
+  },
+  statCardActive: {
+    borderColor: "#ffeb3b",
+    backgroundColor: "#272410",
+  },
+  statButton: {
+    width: "100%",
+    color: "inherit",
+    font: "inherit",
+    textAlign: "left",
+    cursor: "pointer",
   },
   statLabel: { display: "block", color: "#aeb4be", fontSize: "12px", marginBottom: "6px" },
   statValue: { color: "#f4f4f4", fontSize: "24px", lineHeight: 1 },
