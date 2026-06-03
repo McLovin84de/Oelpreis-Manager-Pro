@@ -44,6 +44,7 @@
 - Aktive Suche und Filter werden als kompakte Chips angezeigt und koennen zentral zurueckgesetzt werden.
 - Haeufige Freigaben duerfen als Schnellchips angeboten werden. Die Suche bleibt normalisiert, damit z. B. `50400`, `504 00` und `504.00` zusammenpassen.
 - Bei langen Freigaben darf die eingeklappte Vorschau bei aktiver Suche automatisch den Trefferbereich zeigen, damit die gelbe Markierung sichtbar bleibt.
+- Suchtreffer duerfen in allen relevanten Textspalten markiert werden, nicht nur in Bezeichnung und Freigaben.
 - Suche, Sortierung und Datenexport sollen weiter mit den Originalfeldern funktionieren.
 
 ## Export

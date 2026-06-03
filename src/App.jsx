@@ -957,14 +957,14 @@ function App() {
                 const marge = getMargeProzent(oil);
                 return (
                   <tr key={oil.artikelnummer || oil.interne_nummer || i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
-                    <td style={styles.td}>{oil.artikelnummer || oil.interne_nummer || "–"}</td>
-                    <td style={styles.td}>{oil.hersteller_artikelnummer || "–"}</td>
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.artikelnummer || oil.interne_nummer || "–") }} />
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.hersteller_artikelnummer || "–") }} />
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(getDisplayBezeichnung(oil)) }} />
                     <td style={styles.freigabenTd}>{renderFreigaben(oil)}</td>
-                    <td style={styles.td}>{oil.hersteller || "–"}</td>
-                    <td style={styles.td}>{oil.kategorie || "–"}</td>
-                    <td style={styles.td}>{oil.fluid_typ || "–"}</td>
-                    <td style={styles.td}>{oil.display_spezifikation || "–"}</td>
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.hersteller || "–") }} />
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.kategorie || "–") }} />
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.fluid_typ || "–") }} />
+                    <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.display_spezifikation || "–") }} />
                     <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(ek, getDisplayPricePerLiter(oil, ek, "ek_pro_liter"))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(vk, getDisplayPricePerLiter(oil, vk, "preis_pro_liter"))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
