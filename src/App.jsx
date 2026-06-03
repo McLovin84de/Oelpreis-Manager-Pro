@@ -637,6 +637,13 @@ function App() {
       count: data.daten.filter((oil) => oil.search_text.includes(normalizeSearchText(chip.query))).length,
     }))
     .filter((chip) => chip.count > 0);
+  const quickHerstellerChips = [...new Set(data.daten.map((oil) => oil.hersteller).filter(Boolean))]
+    .map((label) => ({
+      label,
+      query: label,
+      count: data.daten.filter((oil) => oil.hersteller === label).length,
+    }))
+    .sort((a, b) => b.count - a.count || collator.compare(a.label, b.label));
   const quickSpezifikationChips = [...new Set(data.daten.map((oil) => oil.display_spezifikation).filter(Boolean))]
     .map((label) => ({
       label,
@@ -660,12 +667,7 @@ function App() {
     setFilters({ ...getDefaultFilters(), fluidTyp });
   };
 
-  const applyQuickFreigabe = (query) => {
-    setSearch(query);
-    setFilters(getDefaultFilters());
-  };
-
-  const applyQuickSpezifikation = (query) => {
+  const applyQuickSearch = (query) => {
     setSearch(query);
     setFilters(getDefaultFilters());
   };
@@ -793,6 +795,27 @@ function App() {
         </div>
       ) : null}
 
+      {quickHerstellerChips.length > 0 ? (
+        <div style={styles.quickFilterRow}>
+          <span style={styles.quickFilterLabel}>Hersteller:</span>
+          {quickHerstellerChips.map((chip) => {
+            const isActive = normalizeSearchText(search) === normalizeSearchText(chip.query);
+            return (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => applyQuickSearch(chip.query)}
+                style={{ ...styles.quickFilterButton, ...(isActive ? styles.quickFilterButtonActive : null) }}
+                title={`${chip.label} suchen`}
+              >
+                <span>{chip.label}</span>
+                <strong>{chip.count}</strong>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       {quickSpezifikationChips.length > 0 ? (
         <div style={styles.quickFilterRow}>
           <span style={styles.quickFilterLabel}>Viskosität/Spez.:</span>
@@ -802,7 +825,7 @@ function App() {
               <button
                 key={chip.label}
                 type="button"
-                onClick={() => applyQuickSpezifikation(chip.query)}
+                onClick={() => applyQuickSearch(chip.query)}
                 style={{ ...styles.quickFilterButton, ...(isActive ? styles.quickFilterButtonActive : null) }}
                 title={`${chip.label} suchen`}
               >
@@ -823,7 +846,7 @@ function App() {
               <button
                 key={chip.label}
                 type="button"
-                onClick={() => applyQuickFreigabe(chip.query)}
+                onClick={() => applyQuickSearch(chip.query)}
                 style={{ ...styles.quickFilterButton, ...(isActive ? styles.quickFilterButtonActive : null) }}
                 title={`${chip.label} suchen`}
               >
