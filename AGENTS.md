@@ -35,7 +35,7 @@
 - Bezeichnung wird nur in der Anzeige von doppelter Viskositaet bereinigt.
 - Freigaben sind per `mehr` / `weniger` einklappbar.
 - Freigaben werden nur in der Anzeige entdoppelt; Originaldaten bleiben unveraendert.
-- Kennzahlenkarten dienen als Schnellfilter, z. B. kritische Marge, Preis fehlt, Marge fehlt, Viskositaet offen und Freigaben fehlen.
+- Kennzahlenkarten dienen als Schnellfilter, z. B. kritische Marge, Marge beobachten, Preis fehlt, Marge fehlt, Viskositaet offen und Freigaben fehlen.
 - Fluessigkeitstypen werden als klickbare Typ-Filter vorbereitet, damit spaeter auch Kuehlmittel, Bremsfluessigkeit und Getriebeoel direkt filterbar sind.
 - Vorhandene Hersteller duerfen als Schnellchips aus den geladenen Daten erzeugt werden.
 - Vorhandene Viskositaeten/Spezifikationen duerfen als Schnellchips aus den geladenen Daten erzeugt werden.

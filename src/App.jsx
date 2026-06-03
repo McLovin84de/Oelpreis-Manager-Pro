@@ -622,10 +622,11 @@ function App() {
       if (hasMissingFreigaben(oil)) acc.missingFreigaben += 1;
       if (oil.fluid_typ === "Sonstiges") acc.unclearType += 1;
       if (hasValue(marge) && toNumber(marge) < 45) acc.lowMargin += 1;
+      if (hasValue(marge) && toNumber(marge) >= 45 && toNumber(marge) < 60) acc.watchMargin += 1;
       if (!hasValue(marge)) acc.missingMargin += 1;
       return acc;
     },
-    { lowMargin: 0, missingPrices: 0, missingMargin: 0, openSpezifikation: 0, missingFreigaben: 0, unclearType: 0 }
+    { lowMargin: 0, watchMargin: 0, missingPrices: 0, missingMargin: 0, openSpezifikation: 0, missingFreigaben: 0, unclearType: 0 }
   );
 
   const fluidTypeCounts = fluidTypeOrder
@@ -733,6 +734,14 @@ function App() {
           isActive: filters.marge === "kritisch",
           onClick: () => applyStatFilter({ marge: "kritisch" }),
           title: "Artikel mit kritischer Marge anzeigen",
+        })}
+        {renderStatCard({
+          label: "Marge beobachten",
+          value: stats.watchMargin,
+          isWarning: stats.watchMargin > 0,
+          isActive: filters.marge === "beobachten",
+          onClick: () => applyStatFilter({ marge: "beobachten" }),
+          title: "Artikel mit beobachtbarer Marge anzeigen",
         })}
         {renderStatCard({
           label: "Preis fehlt",
