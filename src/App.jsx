@@ -979,7 +979,16 @@ function App() {
           </table>
         </div>
       ) : (
-        <p style={styles.noData}>Keine Treffer oder keine Daten verfügbar.</p>
+        <div style={styles.emptyState}>
+          <p style={{ ...styles.noData, ...styles.emptyStateText }}>
+            {hasActiveControls ? "Keine Treffer für die aktuellen Filter." : "Keine Daten verfügbar."}
+          </p>
+          {hasActiveControls ? (
+            <button type="button" onClick={resetControls} style={styles.resetButton}>
+              Filter zurücksetzen
+            </button>
+          ) : null}
+        </div>
       )}
     </div>
   );
@@ -1144,6 +1153,18 @@ const styles = {
   freigabenToggle: { display: "inline-block", marginLeft: "8px", border: "1px solid #555", borderRadius: "4px", padding: "2px 7px", backgroundColor: "#242424", color: "#ffeb3b", cursor: "pointer", font: "inherit", fontSize: "12px" },
   tr: { backgroundColor: "#1a1a1a" },
   trAlt: { backgroundColor: "#181818" },
+  emptyState: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginTop: "10px",
+    padding: "14px",
+    border: "1px solid #333",
+    borderRadius: "8px",
+    backgroundColor: "#1c1c1c",
+  },
+  emptyStateText: { margin: 0 },
   noData: { marginTop: "20px", fontStyle: "italic", color: "#aaa" },
   errorBox: { backgroundColor: "#4a1515", border: "1px solid #8a2b2b", color: "#ffb3b3", borderRadius: "8px", padding: "12px 14px" },
   inlineWarning: { color: "#ffe28a", fontWeight: 700 },
