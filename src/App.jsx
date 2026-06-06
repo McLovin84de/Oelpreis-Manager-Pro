@@ -3,6 +3,7 @@ import Fuse from "fuse.js";
 
 const getDefaultFilters = () => ({ fluidTyp: "alle", kategorie: "alle", marge: "alle", issue: "alle" });
 const fluidTypeOrder = ["Motoröl", "Getriebeöl", "Kühlmittel", "Bremsflüssigkeit", "Sonstiges"];
+const kategorieOrder = ["Longlife/Spezial", "Premium/Hochleistung", "Standard"];
 const margeFilterLabels = {
   kritisch: "Marge unter 45 %",
   beobachten: "Marge 45 bis 59 %",
@@ -632,6 +633,17 @@ function App() {
   const fluidTypeCounts = fluidTypeOrder
     .map((type) => ({ type, count: data.daten.filter((oil) => oil.fluid_typ === type).length }))
     .filter((item) => item.count > 0);
+  const quickKategorieChips = kategorieOptions
+    .map((label) => ({
+      label,
+      count: data.daten.filter((oil) => oil.kategorie === label).length,
+    }))
+    .sort((a, b) => {
+      const indexA = kategorieOrder.indexOf(a.label);
+      const indexB = kategorieOrder.indexOf(b.label);
+      if (indexA !== -1 || indexB !== -1) return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      return collator.compare(a.label, b.label);
+    });
   const quickFreigabeChips = quickFreigabeCandidates
     .map((chip) => ({
       ...chip,
@@ -666,6 +678,11 @@ function App() {
   const applyFluidTypeFilter = (fluidTyp) => {
     setSearch("");
     setFilters({ ...getDefaultFilters(), fluidTyp });
+  };
+
+  const applyKategorieFilter = (kategorie) => {
+    setSearch("");
+    setFilters({ ...getDefaultFilters(), kategorie });
   };
 
   const applyQuickSearch = (query) => {
@@ -799,6 +816,24 @@ function App() {
             >
               <span>{type}</span>
               <strong>{count}</strong>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {quickKategorieChips.length > 0 ? (
+        <div style={styles.quickFilterRow}>
+          <span style={styles.quickFilterLabel}>Kategorien:</span>
+          {quickKategorieChips.map((chip) => (
+            <button
+              key={chip.label}
+              type="button"
+              onClick={() => applyKategorieFilter(chip.label)}
+              style={{ ...styles.quickFilterButton, ...(filters.kategorie === chip.label ? styles.quickFilterButtonActive : null) }}
+              title={`${chip.label} anzeigen`}
+            >
+              <span>{chip.label}</span>
+              <strong>{chip.count}</strong>
             </button>
           ))}
         </div>
