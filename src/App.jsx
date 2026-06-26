@@ -24,6 +24,8 @@ const quickFreigabeCandidates = [
   { label: "ACEA C3", query: "acea c3" },
   { label: "ACEA C5", query: "acea c5" },
   { label: "ACEA C6", query: "acea c6" },
+  { label: "MB 229.3", query: "mb 229.3" },
+  { label: "MB 229.31", query: "mb 229.31" },
   { label: "MB 229.51", query: "22951" },
   { label: "MB 229.52", query: "22952" },
   { label: "Porsche C30", query: "porsche c30" },
@@ -165,6 +167,48 @@ function App() {
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "");
+
+  const getSearchCriteria = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return [];
+
+    const separatedCriteria = raw
+      .split(/[|,;]+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (separatedCriteria.length > 1) return separatedCriteria;
+
+    const detectedCriteria = [];
+    let remainingText = raw;
+    const collectCriteria = (pattern) => {
+      remainingText = remainingText.replace(pattern, (match) => {
+        detectedCriteria.push(match.trim());
+        return " ";
+      });
+    };
+
+    collectCriteria(/\b\d{1,3}\s*w\s*-?\s*\d{2,3}\b/gi);
+    collectCriteria(/\b(?:mb|mercedes(?:\s*-\s*benz)?|mercedesbenz)\s*(?:approval\s*)?\(?\s*\d{3}(?:[.,]\d+)?\)?/gi);
+    collectCriteria(/\bvw\s*\d{3}\s*[./ -]?\s*\d{2}\b/gi);
+    collectCriteria(/\bacea\s*[a-z]\d\b/gi);
+
+    const remainingTerms = remainingText.split(/\s+/).map((part) => part.trim()).filter(Boolean);
+    if (detectedCriteria.length) return [...remainingTerms, ...detectedCriteria];
+
+    return [raw];
+  };
+
+  const normalizeSearchCriterion = (value) => {
+    const normalized = normalizeSearchText(value);
+    if (normalized === "mercedes" || normalized === "mercedesbenz") return "mb";
+    if (normalized.startsWith("mercedesbenz")) return `mb${normalized.slice("mercedesbenz".length)}`;
+    if (normalized.startsWith("mercedes")) return `mb${normalized.slice("mercedes".length)}`;
+    return normalized;
+  };
+
+  const getNormalizedSearchCriteria = (value) =>
+    getSearchCriteria(value).map(normalizeSearchCriterion).filter(Boolean);
 
   const normalizeViskositaet = (value) => {
     const match = String(value || "").match(/\b(\d{1,3})\s*w\s*-?\s*(\d{2,3})\b/i);
@@ -321,11 +365,12 @@ function App() {
     let searchMatches = data.daten;
 
     if (search.trim()) {
-      const normalizedSearch = normalizeSearchText(search);
-      const directMatches = normalizedSearch
-        ? data.daten.filter((oil) => oil.search_text.includes(normalizedSearch))
+      const searchCriteria = getSearchCriteria(search);
+      const normalizedCriteria = getNormalizedSearchCriteria(search);
+      const directMatches = normalizedCriteria.length
+        ? data.daten.filter((oil) => normalizedCriteria.every((criterion) => oil.search_text.includes(criterion)))
         : [];
-      const fuzzyMatches = fuse.search(search).map((r) => r.item);
+      const fuzzyMatches = searchCriteria.length === 1 ? fuse.search(searchCriteria[0]).map((r) => r.item) : [];
       const mergedMatches = new Map();
 
       [...directMatches, ...fuzzyMatches].forEach((oil) => {
@@ -369,8 +414,8 @@ function App() {
     const rawText = Array.isArray(text) ? text.join(", ") : String(text || "");
     if (!rawText) return "";
 
-    const normalizedNeedle = normalizeSearchText(search);
-    if (!normalizedNeedle) return escapeHtml(rawText);
+    const normalizedNeedles = getNormalizedSearchCriteria(search);
+    if (!normalizedNeedles.length) return escapeHtml(rawText);
 
     let normalizedText = "";
     const indexMap = [];
@@ -384,24 +429,28 @@ function App() {
     }
 
     const ranges = [];
-    let matchIndex = normalizedText.indexOf(normalizedNeedle);
-    while (matchIndex !== -1) {
-      const matchEnd = matchIndex + normalizedNeedle.length - 1;
-      ranges.push({ start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 });
-      matchIndex = normalizedText.indexOf(normalizedNeedle, matchIndex + normalizedNeedle.length);
-    }
+    normalizedNeedles.forEach((needle) => {
+      let matchIndex = normalizedText.indexOf(needle);
+      while (matchIndex !== -1) {
+        const matchEnd = matchIndex + needle.length - 1;
+        ranges.push({ start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 });
+        matchIndex = normalizedText.indexOf(needle, matchIndex + needle.length);
+      }
+    });
 
     if (!ranges.length) return escapeHtml(rawText);
 
-    const mergedRanges = ranges.reduce((merged, range) => {
-      const previous = merged[merged.length - 1];
-      if (previous && range.start <= previous.end) {
-        previous.end = Math.max(previous.end, range.end);
-      } else {
-        merged.push({ ...range });
-      }
-      return merged;
-    }, []);
+    const mergedRanges = ranges
+      .sort((a, b) => a.start - b.start || a.end - b.end)
+      .reduce((merged, range) => {
+        const previous = merged[merged.length - 1];
+        if (previous && range.start <= previous.end) {
+          previous.end = Math.max(previous.end, range.end);
+        } else {
+          merged.push({ ...range });
+        }
+        return merged;
+      }, []);
 
     let result = "";
     let cursor = 0;
@@ -419,8 +468,8 @@ function App() {
 
   const getFirstNormalizedMatchRange = (text, query) => {
     const rawText = String(text || "");
-    const normalizedNeedle = normalizeSearchText(query);
-    if (!rawText || !normalizedNeedle) return null;
+    const normalizedNeedles = getNormalizedSearchCriteria(query);
+    if (!rawText || !normalizedNeedles.length) return null;
 
     let normalizedText = "";
     const indexMap = [];
@@ -433,11 +482,15 @@ function App() {
       }
     }
 
-    const matchIndex = normalizedText.indexOf(normalizedNeedle);
-    if (matchIndex === -1) return null;
+    return normalizedNeedles.reduce((bestRange, needle) => {
+      const matchIndex = normalizedText.indexOf(needle);
+      if (matchIndex === -1) return bestRange;
 
-    const matchEnd = matchIndex + normalizedNeedle.length - 1;
-    return { start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 };
+      const matchEnd = matchIndex + needle.length - 1;
+      const range = { start: indexMap[matchIndex], end: indexMap[matchEnd] + 1 };
+      if (!bestRange || range.start < bestRange.start) return range;
+      return bestRange;
+    }, null);
   };
 
   const getDisplayBezeichnung = (oil) => {
@@ -570,21 +623,27 @@ function App() {
 
   const fluidTypOptions = [...new Set(data.daten.map((oil) => oil.fluid_typ).filter(Boolean))].sort(collator.compare);
   const kategorieOptions = [...new Set(data.daten.map((oil) => oil.kategorie).filter(Boolean))].sort(collator.compare);
+  const searchCriteria = getSearchCriteria(search);
+  const normalizedSearchCriteria = getNormalizedSearchCriteria(search);
+  const hasSearchCriterion = (query) => normalizedSearchCriteria.includes(normalizeSearchCriterion(query));
+  const removeSearchCriterion = (criterion) => {
+    const normalizedCriterion = normalizeSearchCriterion(criterion);
+    const nextCriteria = getSearchCriteria(search).filter((item) => normalizeSearchCriterion(item) !== normalizedCriterion);
+    setSearch(nextCriteria.join(" | "));
+  };
   const hasActiveControls = Boolean(
-    search.trim() ||
+    searchCriteria.length ||
       filters.fluidTyp !== "alle" ||
       filters.kategorie !== "alle" ||
       filters.marge !== "alle" ||
       filters.issue !== "alle"
   );
   const activeFilterItems = [
-    search.trim()
-      ? {
-          key: "search",
-          label: `Suche: ${search.trim()}`,
-          clear: () => setSearch(""),
-        }
-      : null,
+    ...searchCriteria.map((criterion, index) => ({
+      key: `search-${index}-${normalizeSearchCriterion(criterion)}`,
+      label: `Suche: ${criterion}`,
+      clear: () => removeSearchCriterion(criterion),
+    })),
     filters.fluidTyp !== "alle"
       ? {
           key: "fluidTyp",
@@ -686,7 +745,12 @@ function App() {
   };
 
   const applyQuickSearch = (query) => {
-    setSearch(query);
+    const normalizedQuery = normalizeSearchCriterion(query);
+    const nextCriteria = hasSearchCriterion(query)
+      ? searchCriteria.filter((criterion) => normalizeSearchCriterion(criterion) !== normalizedQuery)
+      : [...searchCriteria, query];
+
+    setSearch(nextCriteria.join(" | "));
     setFilters(getDefaultFilters());
   };
 
@@ -843,7 +907,7 @@ function App() {
         <div style={styles.quickFilterRow}>
           <span style={styles.quickFilterLabel}>Hersteller:</span>
           {quickHerstellerChips.map((chip) => {
-            const isActive = normalizeSearchText(search) === normalizeSearchText(chip.query);
+            const isActive = hasSearchCriterion(chip.query);
             return (
               <button
                 key={chip.label}
@@ -864,7 +928,7 @@ function App() {
         <div style={styles.quickFilterRow}>
           <span style={styles.quickFilterLabel}>Viskosität/Spez.:</span>
           {quickSpezifikationChips.map((chip) => {
-            const isActive = normalizeSearchText(search) === normalizeSearchText(chip.query);
+            const isActive = hasSearchCriterion(chip.query);
             return (
               <button
                 key={chip.label}
@@ -885,7 +949,7 @@ function App() {
         <div style={styles.quickFilterRow}>
           <span style={styles.quickFilterLabel}>Häufige Freigaben:</span>
           {quickFreigabeChips.map((chip) => {
-            const isActive = normalizeSearchText(search) === normalizeSearchText(chip.query);
+            const isActive = hasSearchCriterion(chip.query);
             return (
               <button
                 key={chip.label}
@@ -905,7 +969,7 @@ function App() {
       <div style={styles.toolbar}>
         <input
           type="text"
-          placeholder="Suche nach Artikelnummer, Hersteller-Art.-Nr., Freigabe, Hersteller, Typ..."
+          placeholder="Suche nach Artikelnummer, Freigabe, Hersteller, Typ... mehrere Kriterien mit Leerzeichen oder |"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={styles.search}
