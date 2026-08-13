@@ -5,6 +5,7 @@
 - Arbeite bei Codeaenderungen in kleinen, nachvollziehbaren Schritten.
 - Vor groesseren Aenderungen kurz nennen: Ziel, betroffene Dateien und Risiken.
 - Wenn etwas unklar ist, stelle maximal eine gezielte Rueckfrage.
+- Wenn Codex merkt, dass fuer die aktuelle Aufgabe eine andere Modell-, Aufwand- oder Geschwindigkeitseinstellung sinnvoller waere, weise den Nutzer direkt und konkret darauf hin.
 
 ## Projekt
 - Pfad: `C:\Users\stefa\OneDrive\Documents\GitHub\Oelpreis-Manager-Pro`
