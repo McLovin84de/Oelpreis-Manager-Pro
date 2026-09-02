@@ -16,6 +16,8 @@ LOG_FILE = os.path.join(OUT_DIR, "export_log.txt")
 PROJECT_DIR = os.environ.get("OEL_PROJECT_DIR", os.path.dirname(SCRIPT_DIR))
 PUBLIC_JSON = os.path.join(PROJECT_DIR, "public", "data", "localdb.json")
 SRC_JSON = os.path.join(PROJECT_DIR, "src", "data", "localdb.json")
+HISTORICAL_SPECIAL_STOCK_ARTICLES = {"OEL-037"}
+HISTORICAL_SPECIAL_STOCK_STATUS = "HISTORISCHER_SONDERBESTAND_EK_NICHT_VERGLEICHBAR"
 
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -75,6 +77,7 @@ def apply_sale_price_rules(vk1, kategorie, gebinde_l):
 def load_existing_internal_numbers():
     mapping = {}
     used_numbers = set()
+    existing_items = {}
 
     for path in [PUBLIC_JSON, SRC_JSON, os.path.join(OUT_DIR, "localdb.json")]:
         if not os.path.exists(path):
@@ -106,8 +109,9 @@ def load_existing_internal_numbers():
                 key = str(key).strip()
                 if key and internal:
                     mapping.setdefault(key, internal)
+                    existing_items.setdefault(key, item)
 
-    return mapping, used_numbers
+    return mapping, used_numbers, existing_items
 
 
 def next_internal_number(used_numbers):
@@ -152,22 +156,58 @@ def detect_viskositaet(*values):
     return f"{match.group(1).upper()}W-{match.group(2)}"
 
 
+def detect_explicit_category(bezeichnung):
+    """Return a manually maintained WAP category from the description, if present."""
+    text = str(bezeichnung or "").lower()
+    patterns = [
+        (r"\bpremium\s*/\s*hochleistung\b", "Premium/Hochleistung"),
+        (r"\blonglife\s*/\s*spezial\b", "Longlife/Spezial"),
+        (r"\bstandar(?:d|t)\b", "Standard"),
+    ]
+    for pattern, category in patterns:
+        if re.search(pattern, text, flags=re.IGNORECASE):
+            return category
+    return ""
+
+
 def detect_category(bezeichnung, freigaben):
+    """Conservatively infer a category only when WAP has not set one explicitly."""
+    explicit_category = detect_explicit_category(bezeichnung)
+    if explicit_category:
+        return explicit_category
+
     text = f"{bezeichnung or ''} {freigaben or ''}".lower()
-    if "premium/longlife" in text:
-        return "Longlife/Spezial"
-    performance_terms = ["0w-40", "10w-60", "vw 511", "511 00", "porsche a40", "porsche c40", "amg", "rs", "m-power", "motorsport", "renn"]
-    special_terms = ["0w-20", "0w-30", "vw 508", "508 00", "vw 509", "509 00", "porsche c20", "acea c5", "acea c6", "psa b71 2010", "ford wss", "longlife", "spezial"]
-    if any(term in text for term in performance_terms):
+    performance_patterns = [
+        r"\b0w\s*-?\s*40\b",
+        r"\b10w\s*-?\s*60\b",
+        r"\bvw\s*511(?:\s*00)?\b",
+        r"\bporsche\s*(?:a40|c40)\b",
+        r"\bamg\b",
+        r"\bm\s*-?\s*power\b",
+        r"\bmotorsport\b",
+        r"\brennsport\b",
+    ]
+    special_patterns = [
+        r"\b0w\s*-?\s*(?:20|30)\b",
+        r"\bvw\s*(?:508|509|504|507)(?:\s*00)?\b",
+        r"\bporsche\s*c20\b",
+        r"\bacea\s*c[356]\b",
+        r"\b(?:ford\s*)?wss\b",
+        r"\bbmw\s*(?:longlife|ll)\s*-?\s*0?4\b",
+        r"\bmb\s*229\s*\.\s*(?:31|51|52)\b",
+        r"\bdexos2\b",
+        r"\bdpf\b",
+    ]
+    if any(re.search(pattern, text, flags=re.IGNORECASE) for pattern in performance_patterns):
         return "Premium/Hochleistung"
-    if any(term in text for term in special_terms):
+    if any(re.search(pattern, text, flags=re.IGNORECASE) for pattern in special_patterns):
         return "Longlife/Spezial"
-    return "Standard"
+    return ""
 
 
 def export_json(df):
     daten = []
-    existing_numbers, used_numbers = load_existing_internal_numbers()
+    existing_numbers, used_numbers, existing_items = load_existing_internal_numbers()
 
     for _, row in df.iterrows():
         wap_artikelnummer = str(safe_get(row, "ArtikelNrOrder") or safe_get(row, "ArtikelNr")).strip()
@@ -191,20 +231,44 @@ def export_json(df):
         if wap_artikelnummer:
             existing_numbers.setdefault(wap_artikelnummer, artikelnummer)
 
+        existing_item = (
+            existing_items.get(hersteller_artikelnummer)
+            or existing_items.get(wap_artikelnummer)
+        )
+
         nettopreis_raw = safe_get(row, "nettopreislieferant") or safe_get(row, "nettopreis_lieferant") or safe_get(row, "nettopreis")
         nettopreis = to_float(nettopreis_raw)
         gebinde_l = parse_liters(bezeichnung)
         fluid_typ = detect_fluid_typ(bezeichnung, freigaben)
         viskositaet = detect_viskositaet(bezeichnung, freigaben)
-        kategorie = detect_category(bezeichnung, freigaben)
+        detected_category = detect_category(bezeichnung, freigaben)
+        category_unclear = not detected_category
+        kategorie = (
+            detected_category
+            or (str(existing_item.get("kategorie", "")).strip() if existing_item else "")
+            or "KATEGORIE_UNKLAR"
+        )
         vk1_raw = to_float(safe_get(row, "vk1"))
-        vk1 = apply_sale_price_rules(vk1_raw, kategorie, gebinde_l) if fluid_typ == "Motoröl" else vk1_raw
+        historical_special_stock = artikelnummer in HISTORICAL_SPECIAL_STOCK_ARTICLES
+        if category_unclear:
+            vk1 = to_float(existing_item.get("vk1")) if existing_item else vk1_raw
+        else:
+            vk1 = apply_sale_price_rules(vk1_raw, kategorie, gebinde_l) if fluid_typ == "Motoröl" else vk1_raw
 
-        rohertrag = (vk1 - nettopreis) if vk1 > 0 else 0
-        marge_prozent = (((vk1 - nettopreis) / vk1) * 100) if vk1 > 0 else 0
+        cost_unverifiable = nettopreis <= 0 and not historical_special_stock
+        preiswirksam = not category_unclear and not cost_unverifiable and vk1 > 0
+        margin_calculable = preiswirksam and nettopreis > 0 and not historical_special_stock
+        rohertrag = (vk1 - nettopreis) if margin_calculable else None
+        marge_prozent = (((vk1 - nettopreis) / vk1) * 100) if margin_calculable else None
         preis_pro_liter = (vk1 / gebinde_l) if gebinde_l > 0 else vk1
         ek_pro_liter = (nettopreis / gebinde_l) if gebinde_l > 0 else nettopreis
-        marge_pro_liter = preis_pro_liter - ek_pro_liter
+        marge_pro_liter = preis_pro_liter - ek_pro_liter if margin_calculable else None
+
+        review_reasons = []
+        if category_unclear:
+            review_reasons.append("KATEGORIE_UNKLAR")
+        if cost_unverifiable:
+            review_reasons.append("EK_NICHT_VERGLEICHBAR")
 
         ds = {
             "interne_nummer": artikelnummer,
@@ -223,9 +287,13 @@ def export_json(df):
             "vk1": round(vk1, 2),
             "preis_pro_liter": round(preis_pro_liter, 2),
             "ek_pro_liter": round(ek_pro_liter, 2),
-            "rohertrag": round(rohertrag, 2),
-            "marge_prozent": round(marge_prozent, 1),
-            "marge_pro_liter": round(marge_pro_liter, 2),
+            "rohertrag": round(rohertrag, 2) if rohertrag is not None else None,
+            "marge_prozent": round(marge_prozent, 1) if marge_prozent is not None else None,
+            "marge_pro_liter": round(marge_pro_liter, 2) if marge_pro_liter is not None else None,
+            "preiswirksam": preiswirksam,
+            "sonderbestand_status": HISTORICAL_SPECIAL_STOCK_STATUS if historical_special_stock else "",
+            "status": "REVIEW" if review_reasons else "OK",
+            "unvollstaendig": "; ".join(review_reasons),
         }
         daten.append(ds)
 

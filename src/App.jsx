@@ -85,8 +85,11 @@ function App() {
 
   const getEk = (oil) => toNumber(oil.nettopreis ?? oil.nettopreislieferant ?? oil.nettopreis_lieferant);
   const getVk = (oil) => toNumber(oil.vk1);
+  const isHistoricalSpecialStock = (oil) => oil.sonderbestand_status === "HISTORISCHER_SONDERBESTAND_EK_NICHT_VERGLEICHBAR";
+  const isPriceEffective = (oil) => oil.preiswirksam !== false;
 
   const getRohertrag = (oil) => {
+    if (isHistoricalSpecialStock(oil) || !isPriceEffective(oil)) return null;
     if (oil.rohertrag !== undefined && oil.rohertrag !== null && oil.rohertrag !== "") return toNumber(oil.rohertrag);
     const vk = getVk(oil);
     const ek = getEk(oil);
@@ -95,6 +98,7 @@ function App() {
   };
 
   const getMargeProzent = (oil) => {
+    if (isHistoricalSpecialStock(oil) || !isPriceEffective(oil)) return null;
     if (oil.marge_prozent !== undefined && oil.marge_prozent !== null && oil.marge_prozent !== "") return toNumber(oil.marge_prozent);
     const vk = getVk(oil);
     const ek = getEk(oil);
@@ -102,7 +106,7 @@ function App() {
     return ((vk - ek) / vk) * 100;
   };
 
-  const hasMissingPrice = (oil) => getEk(oil) <= 0 || getVk(oil) <= 0;
+  const hasMissingPrice = (oil) => !isHistoricalSpecialStock(oil) && (!isPriceEffective(oil) || getEk(oil) <= 0 || getVk(oil) <= 0);
   const needsSpezifikation = (oil) => oil.fluid_typ && oil.fluid_typ !== "Sonstiges";
   const hasOpenSpezifikation = (oil) => needsSpezifikation(oil) && !hasValue(oil.display_spezifikation);
   const hasMissingFreigaben = (oil) => !hasValue(oil.freigaben);
@@ -131,6 +135,7 @@ function App() {
   };
 
   const getMargeProLiter = (oil) => {
+    if (isHistoricalSpecialStock(oil) || !isPriceEffective(oil)) return null;
     const hasEkPerLiter = hasValue(oil.ek_pro_liter);
     const hasVkPerLiter = hasValue(oil.preis_pro_liter);
 
@@ -1063,6 +1068,8 @@ function App() {
                 const ek = getEk(oil);
                 const vk = getVk(oil);
                 const marge = getMargeProzent(oil);
+                const historicalSpecialStock = isHistoricalSpecialStock(oil);
+                const priceEffective = isPriceEffective(oil);
                 return (
                   <tr key={oil.artikelnummer || oil.interne_nummer || i} style={i % 2 ? styles.trAlt : styles.tr} className="row">
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.artikelnummer || oil.interne_nummer || "–") }} />
@@ -1073,8 +1080,8 @@ function App() {
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.kategorie || "–") }} />
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.fluid_typ || "–") }} />
                     <td style={styles.td} dangerouslySetInnerHTML={{ __html: highlight(oil.display_spezifikation || "–") }} />
-                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(ek, getDisplayPricePerLiter(oil, ek, "ek_pro_liter"))}</td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>{renderRequiredEuro(vk, getDisplayPricePerLiter(oil, vk, "preis_pro_liter"))}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{historicalSpecialStock ? "–" : renderRequiredEuro(ek, getDisplayPricePerLiter(oil, ek, "ek_pro_liter"))}</td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>{priceEffective ? renderRequiredEuro(vk, getDisplayPricePerLiter(oil, vk, "preis_pro_liter")) : "–"}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>{formatEuro(getRohertrag(oil))}</td>
                     <td style={{ ...styles.td, textAlign: "right" }}>
                       <span style={{ ...styles.badge, ...getMargeStyle(marge) }}>{formatPercent(marge)}</span>
